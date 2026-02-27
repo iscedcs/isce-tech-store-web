@@ -41,3 +41,45 @@ export const SOCIAL_LINKS = [
   { name: "Linkedin", href: "#", icon: "Linkedin" },
   { name: "Youtube", href: "#", icon: "Youtube" },
 ];
+
+export const PRODUCTS: Record<string, any> = {
+  "classic-digital-business-card": {
+    id: "1",
+    slug: "classic-digital-business-card",
+    title: "Classic Digital Business Card",
+    price: 32.99,
+    rating: 4.9,
+    reviewCount: 4.8,
+    description:
+      "Premium NFC business card with instant contact sharing. Tap to share your digital profile, social media, and portfolio",
+    benefits: ["Stylish Design", "Wireless Payment", "Contactless Access"],
+    imageSrc: "/products/alabaster-prime.jpeg",
+    badge: "NFC",
+  },
+  "nfc-stickers": {
+    id: "2",
+    slug: "nfc-stickers",
+    title: "IISCE Stickers",
+    price: 32.99,
+    rating: 4.8,
+    reviewCount: 6.8,
+    description:
+      "Premium NFC stickers with instant contact sharing. Tap to share your digital profile, social media, and portfolio",
+    benefits: ["Stylish Design", "Wireless Payment", "Contactless Access"],
+    imageSrc: "/products/obsidian-reserve.jpeg",
+    badge: "NFC",
+  },
+  "nfc-smart-watch": {
+    id: "3",
+    slug: "nfc-smart-watch",
+    title: "NFC Smart Watch",
+    price: 32.99,
+    rating: 4.8,
+    reviewCount: 6.8,
+    description:
+      "Premium NFC business card with instant contact sharing. Tap to share your digital profile, social media, and portfolio",
+    benefits: ["Stylish Design", "Wireless Payment", "Contactless Access"],
+    imageSrc: "/products/amethyst-reserve.jpeg",
+    badge: "NFC",
+  },
+};
