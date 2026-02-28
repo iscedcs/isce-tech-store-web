@@ -54,7 +54,7 @@
 --background: #0B111A;
   --foreground: #FFFFFF;
  --card: #0C141E;
-  --card-foreground: #FFFFFF;
+  --card-foreground: #F2F2F7;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: #000000;
