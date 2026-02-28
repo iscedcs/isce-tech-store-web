@@ -55,6 +55,13 @@
   --foreground: #FFFFFF;
  --card: #0C141E;
   --card-foreground: #F2F2F7;
+  --soclin: #D9D9D9;
+  --inputcol: #CCCCCC;
+  --inputbor: #E5E5EA;
+  --buttcol: #0065BF;
+  --cardheadtext: #0052D4;
+  --cardheadtex: #4364F7;
+  --backtext: #0086FF;
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --primary: #000000;
