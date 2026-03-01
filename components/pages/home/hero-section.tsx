@@ -11,7 +11,7 @@ export default function HeroSection() {
           For Smart Living
         </h2>
         <p className="text-lg text-primary-light font-medium max-w-2xl mx-auto">
-          Discover cutting edge gadgets and NFC product that enhance your
+          Discover cutting edge gadgets and smart product(s) that enhance your
           connect lifestyle
         </p>
       </div>

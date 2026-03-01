@@ -6,6 +6,7 @@ import TopBanner from "@/components/layout/top-banner";
 import Navbar from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { CtaSection } from "@/components/shared/cta-section";
+import { ToastProvider } from "@/components/providers/toast-provider";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -16,7 +17,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "ISCE - Smart Tech for Smart Living",
   description:
-    "Discover cutting edge gadgets and NFC products that enhance your connect lifestyle",
+    "Discover cutting edge gadgets and smart products that enhance your connect lifestyle",
   // icons: {
   //   icon: [
   //     {
@@ -44,11 +45,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.variable} antialiased`}>
-        <TopBanner />
-        <Navbar />
-        {children}
-        <CtaSection />
-        <Footer />
+        <ToastProvider>
+          <TopBanner />
+          <Navbar />
+          {children}
+          <CtaSection />
+          <Footer />
+        </ToastProvider>
       </body>
     </html>
   );

@@ -22,13 +22,13 @@ export default function PriceBreakdown({
   const total = baseCost + customizationCost + designCost;
 
   return (
-    <div className="bg-gradient-secondary border border-secondary-gray rounded-lg p-5 space-y-3">
+    <div className="bg-secondary-dark-3 border border-secondary-gray rounded-lg p-5 space-y-3">
       <div className="flex justify-between items-center text-sm">
         <span className="text-secondary-foreground">
-          Base Price (${basePrice} × {quantity})
+          Base Price (₦{basePrice.toLocaleString()} × {quantity})
         </span>
         <span className="text-primary-light font-medium">
-          ${baseCost.toFixed(2)}
+          ₦{baseCost.toLocaleString()}
         </span>
       </div>
 
@@ -37,15 +37,17 @@ export default function PriceBreakdown({
           <div className="flex justify-between items-center text-sm border-t border-secondary-gray pt-3">
             <span className="text-secondary-foreground">Customization Fee</span>
             <span className="text-primary-light font-medium">
-              ₦{customizationCost.toLocaleString()}.00
+              ₦{customizationCost.toLocaleString()}
             </span>
           </div>
 
           {hasCustomDesign && (
             <div className="flex justify-between items-center text-sm">
-              <span className="text-secondary-foreground">Design Service</span>
+              <span className="text-secondary-foreground">
+                Design Service Fee
+              </span>
               <span className="text-primary-light font-medium">
-                ₦{designCost.toLocaleString()}.00
+                ₦{designCost.toLocaleString()}
               </span>
             </div>
           )}
@@ -54,13 +56,10 @@ export default function PriceBreakdown({
 
       <div className="flex justify-between items-center text-base font-semibold pt-3 border-t border-secondary-gray">
         <span className="text-primary-light">Total:</span>
-        <span className="text-accent-blue">
-          ${baseCost.toFixed(2)} + ₦
-          {(customizationCost + designCost).toLocaleString()}
-        </span>
+        <span className="text-accent-blue">₦{total.toLocaleString()}</span>
       </div>
 
-      {isCustomizing && (
+      {isCustomizing && customizationCost + designCost > 0 && (
         <p className="text-xs text-secondary-foreground italic pt-2">
           Includes ₦{(customizationCost + designCost).toLocaleString()} for
           customization

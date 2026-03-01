@@ -3,49 +3,82 @@
 import { Input } from "@/components/ui/input";
 import { CartIcon, HeartIcon, HomeIcon, SearchIcon } from "@/lib/icons";
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 import MaxWidthWrapper from "../shared/max-width-wrapper";
+import CartDrawer from "../cart/cart-drawer";
+import { useCartStore } from "@/lib/store/cart-store";
+import { Button } from "../ui/button";
+import { StoreIcon } from "lucide-react";
 
 export default function Navbar() {
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { getTotalItems } = useCartStore();
+  const totalItems = getTotalItems();
+
   return (
-    <MaxWidthWrapper>
-      <nav className="bg-secondary-dark text-primary-light px-6 py-6 flex justify-between items-center gap-8">
-        <div className="shrink-0">
-          <Image
-            src="/assets/isce_white_full_logo.png"
-            width={80}
-            height={80}
-            alt="ISCE STORE"
-            quality={75}
-          />
-        </div>
-
-        {/* Search Bar */}
-        <div className="flex-1 max-w-md bg-primary-foreground">
-          <div className="relative">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-gray" />
-            <Input
-              type="text"
-              placeholder="Search Product....."
-              className="w-full border border-secondary-gray text-primary-light placeholder:text-secondary-gray pl-10 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-blue"
+    <>
+      <MaxWidthWrapper>
+        <nav className="bg-secondary-dark text-primary-light px-6 py-6 flex justify-between items-center gap-8">
+          {/* Logo */}
+          <Link
+            href="/"
+            className="shrink-0 hover:opacity-80 transition-opacity">
+            <Image
+              src="/assets/isce_white_full_logo.png"
+              width={80}
+              height={80}
+              alt="ISCE STORE"
+              quality={75}
             />
-          </div>
-        </div>
+          </Link>
 
-        {/* Right Icons */}
-        <div className="flex gap-6 items-center shrink-0">
-          <button aria-label="Home">
-            <HomeIcon />
-          </button>
-          <button aria-label="Wishlist">
-            <HeartIcon />
-          </button>
-          <button
-            className="hover:text-accent-blue transition-colors"
-            aria-label="Shopping Cart">
-            <CartIcon />
-          </button>
-        </div>
-      </nav>
-    </MaxWidthWrapper>
+          {/* Search Bar */}
+          <div className="flex-1 max-w-md bg-primary-foreground">
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-gray" />
+              <Input
+                type="text"
+                placeholder="Search Product....."
+                className="w-full border border-secondary-gray text-primary-light placeholder:text-secondary-gray pl-10 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-blue"
+              />
+            </div>
+          </div>
+
+          {/* Right Icons */}
+          <div className="flex gap-6 items-center shrink-0">
+            <Link href="/" className="transition-colors" aria-label="Home">
+              <HomeIcon />
+            </Link>
+            <button
+              className="bg-transparent cursor-pointer transition-colors"
+              aria-label="Wishlist">
+              <HeartIcon />
+            </button>
+
+            <Link
+              href="/products"
+              className="transition-colors"
+              aria-label="Home">
+              <StoreIcon />
+            </Link>
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="bg-transparent cursor-pointer transition-colors relative"
+              aria-label="Shopping Cart">
+              <CartIcon />
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-destructive text-primary-light text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+          </div>
+        </nav>
+      </MaxWidthWrapper>
+
+      {/* Cart Drawer */}
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+    </>
   );
 }

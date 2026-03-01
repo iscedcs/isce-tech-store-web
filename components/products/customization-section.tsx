@@ -6,42 +6,86 @@ import ColorSelector from "./color-selector";
 import DesignUploadArea from "./design-upload-area";
 import CustomDesignToggle from "./custom-design-section";
 import PriceBreakdown from "./price-breakdown";
+import { useCartStore } from "@/lib/store/cart-store";
+import { useToastContext } from "../providers/toast-provider";
 
 interface CustomizationSectionProps {
+  productTitle: string;
   basePrice: number;
   quantity: number;
+  availableColors: string[];
   onCancel: () => void;
 }
 
 export default function CustomizationSection({
+  productTitle,
   basePrice,
   quantity,
+  availableColors,
   onCancel,
 }: CustomizationSectionProps) {
-  const [selectedColor, setSelectedColor] = useState("Arctic White");
-  const [previewTab, setPreviewTab] = useState<"upload" | "preview">("upload");
+  const [selectedColor, setSelectedColor] = useState(availableColors[0]);
   const [frontDesign, setFrontDesign] = useState<File | null>(null);
   const [backDesign, setBackDesign] = useState<File | null>(null);
   const [customDesignEnabled, setCustomDesignEnabled] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const { addItem } = useCartStore();
+  const { toast } = useToastContext();
+
+  const handleAddCustomizedToCart = async () => {
+    setIsAdding(true);
+    try {
+      // Simulate processing
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      addItem({
+        id: `${productTitle}-${Date.now()}`,
+        slug: productTitle.toLowerCase().replace(/\s+/g, "-"),
+        title: `${productTitle} (Customized)`,
+        price: basePrice,
+        quantity,
+        selectedColor,
+        customization: {
+          frontDesign,
+          backDesign,
+          hasCustomDesign: customDesignEnabled,
+        },
+      });
+
+      toast({
+        title: "Customized card added to cart",
+        description: `${quantity}x customized ${productTitle} added successfully`,
+      });
+
+      onCancel();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add item to cart. Please try again.",
+      });
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
-    <div className="bg-gradient-secondary border border-secondary-gray rounded-lg p-6 space-y-6">
+    <div className="bg-secondary-dark-2 border border-secondary-gray rounded-lg p-6 space-y-6">
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-primary-light mb-2">
-          Card Customization
+          Customize {productTitle}
         </h2>
-        <p className="text-secondary-foreground">
-          Personalize your NFC card with your own design or let us create one
-          for you
+        <p className="text-secondary-foreground text-sm">
+          Design your unique card with custom colors and artwork
         </p>
       </div>
 
       {/* Alert Box */}
-      <div className="bg-primary-light bg-opacity-10 border border-secondary-foreground rounded-lg p-4 flex gap-3">
+      <div className="bg-accent-blue bg-opacity-10 border border-accent-blue rounded-lg p-4 flex gap-3">
         <AlertCircle className="text-accent-blue shrink-0" size={20} />
         <p className="text-secondary-foreground text-sm">
-          Note: Only one revision is allowed for custom card designs
+          Customization changes may require additional processing time
         </p>
       </div>
 
@@ -50,83 +94,37 @@ export default function CustomizationSection({
         <ColorSelector
           selectedColor={selectedColor}
           onColorChange={setSelectedColor}
+          colors={availableColors}
         />
       </div>
 
       {/* Design Upload Section */}
       <div className="space-y-4">
-        <div className="flex border-b border-secondary-gray">
-          <button
-            onClick={() => setPreviewTab("upload")}
-            className={`px-4 py-3 font-medium transition-colors ${
-              previewTab === "upload"
-                ? "text-accent-blue border-b-2 border-accent-blue -mb-0.5"
-                : "text-secondary-foreground hover:text-primary-light"
-            }`}>
-            Upload Your Design
-          </button>
-          <button
-            onClick={() => setPreviewTab("preview")}
-            className={`px-4 py-3 font-medium transition-colors ml-auto ${
-              previewTab === "preview"
-                ? "text-accent-blue border-b-2 border-accent-blue -mb-0.5"
-                : "text-secondary-foreground hover:text-primary-light"
-            }`}>
-            Preview Design
-          </button>
+        <h3 className="text-primary-light font-semibold text-sm">
+          Design Files
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DesignUploadArea
+            label="Front Design"
+            onFileSelect={setFrontDesign}
+          />
+          <DesignUploadArea label="Back Design" onFileSelect={setBackDesign} />
         </div>
-
-        {previewTab === "upload" && (
-          <div className="space-y-6 mt-6">
-            {/* Front Design */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-primary-light font-semibold">
-                  Front Card Design
-                </h4>
-                <button className="text-accent-blue hover:text-blue-400 text-sm font-medium">
-                  ℹ️
-                </button>
-              </div>
-              <DesignUploadArea
-                label="Upload Front Design"
-                onFileSelect={setFrontDesign}
-              />
-              {frontDesign && (
-                <p className="text-xs text-accent-blue">
-                  ✓ {frontDesign.name} uploaded
-                </p>
-              )}
-            </div>
-
-            {/* Back Design */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="text-primary-light font-semibold">
-                  Back Card Design
-                </h4>
-                <button className="text-accent-blue hover:text-blue-400 text-sm font-medium">
-                  ℹ️
-                </button>
-              </div>
-              <DesignUploadArea
-                label="Upload Back Design"
-                onFileSelect={setBackDesign}
-              />
-              {backDesign && (
-                <p className="text-xs text-accent-blue">
-                  ✓ {backDesign.name} uploaded
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {previewTab === "preview" && (
-          <div className="mt-6 p-8 bg-linear-to-br from-secondary-gradient-1 to-secondary-gradient-3 rounded-lg text-center">
-            <p className="text-secondary-foreground">
-              Design preview will appear here after upload
+        {(frontDesign || backDesign) && (
+          <div className="bg-secondary-dark-3 border border-secondary-gray rounded-lg p-3">
+            <p className="text-sm text-primary-light font-medium mb-2">
+              Files Selected:
             </p>
+            {frontDesign && (
+              <p className="text-xs text-secondary-foreground">
+                📄 Front: {frontDesign.name}
+              </p>
+            )}
+            {backDesign && (
+              <p className="text-xs text-secondary-foreground">
+                📄 Back: {backDesign.name}
+              </p>
+            )}
           </div>
         )}
       </div>

@@ -4,6 +4,8 @@ import { useState } from "react";
 import ProductImageSection from "./product-image-section";
 import ProductInfoSection from "./product-info-section";
 import CustomizationSection from "./customization-section";
+import { useCartStore } from "@/lib/store/cart-store";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProductDetailWrapperProps {
   product: {
@@ -14,9 +16,12 @@ interface ProductDetailWrapperProps {
     rating: number;
     reviewCount: number;
     description: string;
-    benefits: string[];
+    longDescription: string;
+    features: string[];
+    brandFeel: string[];
     imageSrc: string;
     badge?: string;
+    colors: string[];
   };
 }
 
@@ -24,11 +29,25 @@ export default function ProductDetailWrapper({
   product,
 }: ProductDetailWrapperProps) {
   const [quantity, setQuantity] = useState(1);
+  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [isCustomizing, setIsCustomizing] = useState(false);
+  const { addItem } = useCartStore();
+  const { toast } = useToast();
 
   const handleAddToCart = () => {
-    console.log("[v0] Adding to cart:", { product: product.title, quantity });
-    // Cart logic will be implemented later
+    addItem({
+      id: product.id,
+      slug: product.slug,
+      title: product.title,
+      price: product.price,
+      quantity,
+      selectedColor,
+    });
+    
+    toast({
+      title: "Added to cart",
+      description: `${quantity}x ${product.title} (${selectedColor}) added to your cart`,
+    });
   };
 
   const handleCustomizeClick = () => {
@@ -58,9 +77,14 @@ export default function ProductDetailWrapper({
             rating={product.rating}
             reviewCount={product.reviewCount}
             description={product.description}
-            benefits={product.benefits}
+            longDescription={product.longDescription}
+            features={product.features}
+            brandFeel={product.brandFeel}
             quantity={quantity}
+            selectedColor={selectedColor}
+            availableColors={product.colors}
             onQuantityChange={setQuantity}
+            onColorChange={setSelectedColor}
             onAddToCart={handleAddToCart}
             onCustomizeClick={handleCustomizeClick}
           />
@@ -69,8 +93,10 @@ export default function ProductDetailWrapper({
         // Customization View
         <div className="max-w-4xl mx-auto">
           <CustomizationSection
+            productTitle={product.title}
             basePrice={product.price}
             quantity={quantity}
+            availableColors={product.colors}
             onCancel={handleCancelCustomization}
           />
         </div>

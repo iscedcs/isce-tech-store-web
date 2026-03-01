@@ -10,7 +10,7 @@ export default function CustomDesignToggle({
   onToggle,
 }: CustomDesignToggleProps) {
   return (
-    <div className="bg-gradient-secondary border border-secondary-gray rounded-lg p-5">
+    <div className="bg-secondary-dark-3 border border-secondary-gray rounded-lg p-5">
       <div className="flex items-center justify-between">
         <div>
           <h4 className="text-primary-light font-medium mb-1">
@@ -26,7 +26,7 @@ export default function CustomDesignToggle({
             enabled ? "bg-accent-blue" : "bg-secondary-gray"
           }`}>
           <span
-            className={`inline-block h-6 w-6 transform rounded-full bg-primary-light transition-transform ${
+            className={`inline-block h-6 w-6 transform rounded-full bg-primary transition-transform ${
               enabled ? "translate-x-7" : "translate-x-1"
             }`}
           />
@@ -35,7 +35,7 @@ export default function CustomDesignToggle({
 
       {enabled && (
         <div className="mt-4 pt-4 border-t border-secondary-gray">
-          <div className="bg-primary-light bg-opacity-10 border border-secondary-foreground rounded-lg p-4">
+          <div className="bg-accent-blue bg-opacity-10 border border-accent-blue rounded-lg p-4">
             <p className="text-accent-blue font-medium text-sm mb-2">
               Custom design service: ₦3,000.00
             </p>
