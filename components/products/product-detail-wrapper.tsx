@@ -42,8 +42,9 @@ export default function ProductDetailWrapper({
       price: product.price,
       quantity,
       selectedColor,
+      image: product.imageSrc,
     });
-    
+
     toast({
       title: "Added to cart",
       description: `${quantity}x ${product.title} (${selectedColor}) added to your cart`,
@@ -94,6 +95,8 @@ export default function ProductDetailWrapper({
         <div className="max-w-4xl mx-auto">
           <CustomizationSection
             productTitle={product.title}
+            productSlug={product.slug}
+            productImage={product.imageSrc}
             basePrice={product.price}
             quantity={quantity}
             availableColors={product.colors}

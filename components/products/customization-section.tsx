@@ -11,6 +11,8 @@ import { useToastContext } from "../providers/toast-provider";
 
 interface CustomizationSectionProps {
   productTitle: string;
+  productSlug: string;
+  productImage: string;
   basePrice: number;
   quantity: number;
   availableColors: string[];
@@ -19,6 +21,8 @@ interface CustomizationSectionProps {
 
 export default function CustomizationSection({
   productTitle,
+  productSlug,
+  productImage,
   basePrice,
   quantity,
   availableColors,
@@ -27,6 +31,8 @@ export default function CustomizationSection({
   const [selectedColor, setSelectedColor] = useState(availableColors[0]);
   const [frontDesign, setFrontDesign] = useState<File | null>(null);
   const [backDesign, setBackDesign] = useState<File | null>(null);
+  const [frontDesignUrl, setFrontDesignUrl] = useState<string | null>(null);
+  const [backDesignUrl, setBackDesignUrl] = useState<string | null>(null);
   const [customDesignEnabled, setCustomDesignEnabled] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -36,26 +42,27 @@ export default function CustomizationSection({
   const handleAddCustomizedToCart = async () => {
     setIsAdding(true);
     try {
-      // Simulate processing
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       addItem({
-        id: `${productTitle}-${Date.now()}`,
-        slug: productTitle.toLowerCase().replace(/\s+/g, "-"),
-        title: `${productTitle} (Customized)`,
+        id: productSlug,
+        slug: productSlug,
+        title: `${productTitle}${customDesignEnabled ? " (Customized)" : ""}`,
         price: basePrice,
         quantity,
         selectedColor,
+        image: productImage,
         customization: {
-          frontDesign,
-          backDesign,
-          hasCustomDesign: customDesignEnabled,
+          frontDesign: frontDesignUrl,
+          backDesign: backDesignUrl,
+          hasCustomDesign:
+            customDesignEnabled || !!(frontDesignUrl || backDesignUrl),
+          customizationFee: customDesignEnabled ? 2000 : 0,
+          designServiceFee: 0,
         },
       });
 
       toast({
-        title: "Customized card added to cart",
-        description: `${quantity}x customized ${productTitle} added successfully`,
+        title: "Added to cart",
+        description: `${quantity}x ${productTitle} ${customDesignEnabled ? "(customized) " : ""}added successfully`,
       });
 
       onCancel();
@@ -107,22 +114,35 @@ export default function CustomizationSection({
           <DesignUploadArea
             label="Front Design"
             onFileSelect={setFrontDesign}
+            onUploadComplete={setFrontDesignUrl}
+            onClear={() => {
+              setFrontDesign(null);
+              setFrontDesignUrl(null);
+            }}
           />
-          <DesignUploadArea label="Back Design" onFileSelect={setBackDesign} />
+          <DesignUploadArea
+            label="Back Design"
+            onFileSelect={setBackDesign}
+            onUploadComplete={setBackDesignUrl}
+            onClear={() => {
+              setBackDesign(null);
+              setBackDesignUrl(null);
+            }}
+          />
         </div>
-        {(frontDesign || backDesign) && (
-          <div className="bg-secondary-dark-3 border border-secondary-gray rounded-lg p-3">
-            <p className="text-sm text-primary-light font-medium mb-2">
-              Files Selected:
+        {(frontDesignUrl || backDesignUrl) && (
+          <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+            <p className="text-sm text-green-500 font-medium mb-2">
+              ✓ Designs uploaded successfully
             </p>
-            {frontDesign && (
+            {frontDesignUrl && (
               <p className="text-xs text-secondary-foreground">
-                📄 Front: {frontDesign.name}
+                📄 Front design ready
               </p>
             )}
-            {backDesign && (
+            {backDesignUrl && (
               <p className="text-xs text-secondary-foreground">
-                📄 Back: {backDesign.name}
+                📄 Back design ready
               </p>
             )}
           </div>
@@ -151,11 +171,15 @@ export default function CustomizationSection({
       <div className="flex gap-3 pt-4">
         <button
           onClick={onCancel}
-          className="flex-1 bg-gradient-secondary border border-secondary-gray text-primary-light hover:border-secondary-foreground font-semibold py-3 px-6 rounded-lg transition-colors">
-          Cancel Customization
+          disabled={isAdding}
+          className="flex-1 bg-gradient-secondary border border-secondary-gray text-primary-light hover:border-secondary-foreground font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50">
+          Cancel
         </button>
-        <button className="flex-1 bg-accent-blue hover:bg-blue-600 text-primary-dark font-semibold py-3 px-6 rounded-lg transition-colors">
-          Apply Customization
+        <button
+          onClick={handleAddCustomizedToCart}
+          disabled={isAdding}
+          className="flex-1 bg-accent-blue hover:bg-blue-600 text-primary-dark font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50">
+          {isAdding ? "Adding..." : "Add to Cart"}
         </button>
       </div>
     </div>

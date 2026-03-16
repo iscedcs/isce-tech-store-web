@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { PRODUCTS } from "@/lib/const";
 import { TrashIcon } from "@/lib/icons";
 import { CartItem, useCartStore } from "@/lib/store/cart-store";
+import { formatCurrency } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -14,15 +16,13 @@ interface CartDrawerProps {
 
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { items, removeItem, updateQuantity, getTotalPrice } = useCartStore();
+  const router = useRouter();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const handleCheckout = () => {
     setIsCheckingOut(true);
-    // Checkout logic will be implemented later
-    setTimeout(() => {
-      setIsCheckingOut(false);
-      onClose();
-    }, 1500);
+    onClose();
+    router.push("/checkout");
   };
 
   return (
@@ -86,7 +86,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 Subtotal:
               </span>
               <span className="text-2xl font-bold text-accent-blue">
-                ₦{getTotalPrice().toLocaleString()}
+                {formatCurrency(getTotalPrice())}
               </span>
             </div>
 
@@ -94,11 +94,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <button
               onClick={handleCheckout}
               disabled={isCheckingOut}
-              className={`w-full py-3 rounded-lg font-semibold transition-colors ${
-                isCheckingOut
-                  ? "bg-secondary-gray text-secondary-foreground cursor-not-allowed"
-                  : "bg-accent-blue text-primary hover:bg-accent-blue-light"
-              }`}>
+              className="w-full py-3 rounded-lg font-semibold transition-colors bg-accent-blue text-primary hover:bg-accent-blue-light disabled:opacity-50">
               {isCheckingOut ? "Processing..." : "Proceed to Checkout"}
             </button>
 

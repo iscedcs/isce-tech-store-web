@@ -170,3 +170,31 @@ export const PRODUCT_CATEGORIES = [
   "SMART DEVICE",
   "ACCESSORIES",
 ];
+
+export const AUTH_API = process.env.ISCE_AUTH_BACKEND_URL;
+export const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+export const GIG_Logistics = process.env.GIG_BASE_URL;
+
+export const URLS = {
+  auth: {
+    sign_up: "/auth/signup",
+    sign_in: "/auth/signin",
+    sign_out: "/auth/signout",
+    reset_token: "/auth/send-reset-token",
+    reset_password: "/auth/reset-password",
+  },
+  user: {
+    one: "/user/one/{id}",
+  },
+  device: {
+    request_token: "/device/request-token",
+    create: "/device/create",
+  },
+};
+
+const DEVICE_TYPE_MAPPING = {
+  CARD: "6214bdef7dbcb",
+  WRISTBAND: "6214bdef6dbcb",
+  STICKER: "6214bdef5dbcb",
+  KEYCHAIN: "6214bdef4dbcb",
+};

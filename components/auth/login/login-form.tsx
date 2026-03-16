@@ -1,96 +1,405 @@
 "use client";
 
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CardWrapper } from "./card-wrapper";
-import { FormInput } from "./form-input";
 import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 import Link from "next/link";
-
+import {
+  EmailIcon,
+  PadlockIcon,
+  UserIcon,
+  PhoneIcon,
+  CalendarIcon,
+  MapPinIcon,
+} from "@/lib/icons";
+import {
+  loginFormSchema,
+  signUpFormSchema,
+  LoginFormValues,
+  SignUpFormValues,
+} from "@/lib/schemas";
+import { login } from "@/actions/login";
+import { signup } from "@/actions/sign-up";
+import { toast } from "sonner";
 
 interface AuthFormProps {
   type: "login" | "register";
-} 
-
+}
 
 export const AuthForm = ({ type }: AuthFormProps) => {
   const isLogin = type === "login";
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [step, setStep] = useState(1); // Step 1 or 2 for registration
+
+  // Login form
+  const loginForm = useForm<LoginFormValues>({
+    resolver: zodResolver(loginFormSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  // Signup form
+  const signupForm = useForm<SignUpFormValues>({
+    resolver: zodResolver(signUpFormSchema),
+    defaultValues: {
+      fullName: "",
+      email: "",
+      phone: "",
+      dob: "",
+      address: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  const onLoginSubmit = async (values: LoginFormValues) => {
+    setError(null);
+    startTransition(async () => {
+      const result = await login(values, callbackUrl);
+
+      if (result.success) {
+        toast.success(result.message);
+        router.push(result.redirectUrl || "/");
+        router.refresh();
+      } else {
+        setError(result.error || "Login failed");
+        toast.error(result.error || "Login failed");
+      }
+    });
+  };
+
+  const onSignupSubmit = async (values: SignUpFormValues) => {
+    setError(null);
+    startTransition(async () => {
+      const result = await signup(values);
+
+      if (result.success) {
+        toast.success(result.message);
+        router.push("/login");
+      } else {
+        setError(result.error || "Signup failed");
+        toast.error(result.error || "Signup failed");
+      }
+    });
+  };
+
+  // Handle moving to step 2 for registration
+  const handleNextStep = async () => {
+    // Validate step 1 fields before moving to step 2
+    const step1Valid = await signupForm.trigger([
+      "fullName",
+      "email",
+      "phone",
+      "password",
+      "confirmPassword",
+    ]);
+    if (step1Valid) {
+      setStep(2);
+      setError(null);
+    }
+  };
+
   return (
     <CardWrapper
-      headerTitle={isLogin ? "Welcome Back" : "Join ISCE"}
+      headerTitle={
+        isLogin
+          ? "Welcome Back"
+          : step === 1
+            ? "Join ISCE"
+            : "Complete Your Profile"
+      }
       headerSubtitle={
         isLogin
           ? "Sign in to continue shopping"
-          : "Join the ISCE ecosystem-- shop innovation, live smart"
+          : step === 1
+            ? "Join the ISCE ecosystem-- shop innovation, live smart"
+            : "Just a few more details to get you started"
       }
       backButtonLabel1={
-        isLogin
-          ? "Don't have an account?"
-          : "Already have an account?"
+        isLogin ? "Don't have an account?" : "Already have an account?"
       }
-      backButtonLabel2= {
-        isLogin
-          ? " Sign Up"
-          : " Sign In"
-      }
+      backButtonLabel2={isLogin ? " Sign Up" : " Sign In"}
       backButtonHref={isLogin ? "/register" : "/login"}
-      showSocial
-    >
-      {!isLogin && (
-              <FormInput
-                label="Full Name"
-                type="text"
-                placeholder="John Doe"
-              />
-            )}
-      
-            {/* Shared */}
-            <FormInput
-              label="Email Address"
-              type="email"
-              svg = {<svg width="15" height="10" viewBox="0 0 21 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M1.88533 16C1.34789 16 0.8995 15.824 0.540167 15.472C0.180833 15.12 0.000777778 14.6804 0 14.1531V1.84686C0 1.32038 0.180056 0.881142 0.540167 0.529143C0.900278 0.177143 1.34828 0.000761905 1.88417 0H19.1158C19.6525 0 20.1005 0.176381 20.4598 0.529143C20.8192 0.881904 20.9992 1.32114 21 1.84686V14.1543C21 14.68 20.8199 15.1192 20.4598 15.472C20.0997 15.8248 19.6517 16.0008 19.1158 16H1.88533ZM19.8333 2.15429L11.0227 7.80457C10.9402 7.84648 10.857 7.8819 10.773 7.91086C10.6882 7.93905 10.5972 7.95314 10.5 7.95314C10.4028 7.95314 10.3118 7.93905 10.227 7.91086C10.1422 7.88267 10.059 7.84724 9.97733 7.80457L1.16667 2.15314V14.1531C1.16667 14.3589 1.23394 14.5276 1.3685 14.6594C1.50306 14.7912 1.67533 14.8571 1.88533 14.8571H19.1158C19.3251 14.8571 19.4969 14.7912 19.6315 14.6594C19.7661 14.5276 19.8333 14.3589 19.8333 14.1531V2.15429ZM10.5 6.85714L19.474 1.14286H1.526L10.5 6.85714ZM1.16667 2.39543V1.46857V1.50743V1.14286V1.50857V1.44914V2.39543Z" fill="#8C8C8C"/>
-</svg>
-}
-              placeholder="you@example.com"
-            />
-      
-            <FormInput
-              label="Password"
-              type="password"
-              svg = {<svg width="12" height="15" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M8 11C7.69555 10.9964 7.39732 11.0862 7.14544 11.2573C6.89357 11.4284 6.70015 11.6725 6.59121 11.9568C6.48228 12.2411 6.46306 12.552 6.53615 12.8476C6.60923 13.1431 6.77111 13.4092 7 13.61V15C7 15.2652 7.10536 15.5196 7.29289 15.7071C7.48043 15.8946 7.73478 16 8 16C8.26522 16 8.51957 15.8946 8.70711 15.7071C8.89464 15.5196 9 15.2652 9 15V13.61C9.22889 13.4092 9.39077 13.1431 9.46385 12.8476C9.53694 12.552 9.51772 12.2411 9.40879 11.9568C9.29985 11.6725 9.10643 11.4284 8.85456 11.2573C8.60268 11.0862 8.30445 10.9964 8 11ZM13 7V5C13 3.67392 12.4732 2.40215 11.5355 1.46447C10.5979 0.526784 9.32608 0 8 0C6.67392 0 5.40215 0.526784 4.46447 1.46447C3.52678 2.40215 3 3.67392 3 5V7C2.20435 7 1.44129 7.31607 0.87868 7.87868C0.316071 8.44129 0 9.20435 0 10V17C0 17.7956 0.316071 18.5587 0.87868 19.1213C1.44129 19.6839 2.20435 20 3 20H13C13.7956 20 14.5587 19.6839 15.1213 19.1213C15.6839 18.5587 16 17.7956 16 17V10C16 9.20435 15.6839 8.44129 15.1213 7.87868C14.5587 7.31607 13.7956 7 13 7ZM5 5C5 4.20435 5.31607 3.44129 5.87868 2.87868C6.44129 2.31607 7.20435 2 8 2C8.79565 2 9.55871 2.31607 10.1213 2.87868C10.6839 3.44129 11 4.20435 11 5V7H5V5ZM14 17C14 17.2652 13.8946 17.5196 13.7071 17.7071C13.5196 17.8946 13.2652 18 13 18H3C2.73478 18 2.48043 17.8946 2.29289 17.7071C2.10536 17.5196 2 17.2652 2 17V10C2 9.73478 2.10536 9.48043 2.29289 9.29289C2.48043 9.10536 2.73478 9 3 9H13C13.2652 9 13.5196 9.10536 13.7071 9.29289C13.8946 9.48043 14 9.73478 14 10V17Z" fill="#8C8C8C"/>
-</svg>
-}
-              placeholder="********"
-            />
-      
-            {/* Register Only */}
+      showSocial={isLogin || step === 1}>
+      <form
+        onSubmit={
+          isLogin
+            ? loginForm.handleSubmit(onLoginSubmit)
+            : signupForm.handleSubmit(onSignupSubmit)
+        }
+        className="space-y-4">
+        {/* Step indicator for registration */}
+        {!isLogin && (
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                step === 1
+                  ? "bg-(--buttcol) text-foreground"
+                  : "bg-gray-200 text-gray-600"
+              }`}>
+              1
+            </div>
+            <div className="w-8 h-0.5 bg-gray-200" />
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                step === 2
+                  ? "bg-(--buttcol) text-foreground"
+                  : "bg-gray-200 text-gray-600"
+              }`}>
+              2
+            </div>
+          </div>
+        )}
+
+        {/* ========== STEP 1 FIELDS ========== */}
+        {(!isLogin ? step === 1 : true) && (
+          <>
+            {/* Register Only - Full Name */}
             {!isLogin && (
-              <FormInput
-                label="Confirm Password"
-                type="password"
-                svg = {<svg width="12" height="15" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M8 11C7.69555 10.9964 7.39732 11.0862 7.14544 11.2573C6.89357 11.4284 6.70015 11.6725 6.59121 11.9568C6.48228 12.2411 6.46306 12.552 6.53615 12.8476C6.60923 13.1431 6.77111 13.4092 7 13.61V15C7 15.2652 7.10536 15.5196 7.29289 15.7071C7.48043 15.8946 7.73478 16 8 16C8.26522 16 8.51957 15.8946 8.70711 15.7071C8.89464 15.5196 9 15.2652 9 15V13.61C9.22889 13.4092 9.39077 13.1431 9.46385 12.8476C9.53694 12.552 9.51772 12.2411 9.40879 11.9568C9.29985 11.6725 9.10643 11.4284 8.85456 11.2573C8.60268 11.0862 8.30445 10.9964 8 11ZM13 7V5C13 3.67392 12.4732 2.40215 11.5355 1.46447C10.5979 0.526784 9.32608 0 8 0C6.67392 0 5.40215 0.526784 4.46447 1.46447C3.52678 2.40215 3 3.67392 3 5V7C2.20435 7 1.44129 7.31607 0.87868 7.87868C0.316071 8.44129 0 9.20435 0 10V17C0 17.7956 0.316071 18.5587 0.87868 19.1213C1.44129 19.6839 2.20435 20 3 20H13C13.7956 20 14.5587 19.6839 15.1213 19.1213C15.6839 18.5587 16 17.7956 16 17V10C16 9.20435 15.6839 8.44129 15.1213 7.87868C14.5587 7.31607 13.7956 7 13 7ZM5 5C5 4.20435 5.31607 3.44129 5.87868 2.87868C6.44129 2.31607 7.20435 2 8 2C8.79565 2 9.55871 2.31607 10.1213 2.87868C10.6839 3.44129 11 4.20435 11 5V7H5V5ZM14 17C14 17.2652 13.8946 17.5196 13.7071 17.7071C13.5196 17.8946 13.2652 18 13 18H3C2.73478 18 2.48043 17.8946 2.29289 17.7071C2.10536 17.5196 2 17.2652 2 17V10C2 9.73478 2.10536 9.48043 2.29289 9.29289C2.48043 9.10536 2.73478 9 3 9H13C13.2652 9 13.5196 9.10536 13.7071 9.29289C13.8946 9.48043 14 9.73478 14 10V17Z" fill="#8C8C8C"/>
-</svg>
-}
-                placeholder="********"
-              />
+              <div className="space-y-2">
+                <Label className="text-sm text-black">Full Name</Label>
+                <div className="relative">
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
+                    <UserIcon className="w-4 h-4" />
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="John Doe"
+                    disabled={isPending}
+                    className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10"
+                    {...signupForm.register("fullName")}
+                  />
+                </div>
+                {signupForm.formState.errors.fullName && (
+                  <p className="text-sm text-red-500">
+                    {signupForm.formState.errors.fullName.message}
+                  </p>
+                )}
+              </div>
             )}
-      
-            {/* Login Only */}
+
+            {/* Email */}
+            <div className="space-y-2">
+              <Label className="text-sm text-black">Email Address</Label>
+              <div className="relative">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <EmailIcon className="w-4 h-4" />
+                </div>
+                <Input
+                  type="email"
+                  placeholder="you@example.com"
+                  disabled={isPending}
+                  className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10"
+                  {...(isLogin
+                    ? loginForm.register("email")
+                    : signupForm.register("email"))}
+                />
+              </div>
+              {isLogin
+                ? loginForm.formState.errors.email && (
+                    <p className="text-sm text-red-500">
+                      {loginForm.formState.errors.email.message}
+                    </p>
+                  )
+                : signupForm.formState.errors.email && (
+                    <p className="text-sm text-red-500">
+                      {signupForm.formState.errors.email.message}
+                    </p>
+                  )}
+            </div>
+
+            {/* Register Only - Phone */}
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label className="text-sm text-black">Phone Number</Label>
+                <div className="relative">
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
+                    <PhoneIcon className="w-4 h-4" />
+                  </div>
+                  <Input
+                    type="tel"
+                    placeholder="+234 800 000 0000"
+                    disabled={isPending}
+                    className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10"
+                    {...signupForm.register("phone")}
+                  />
+                </div>
+                {signupForm.formState.errors.phone && (
+                  <p className="text-sm text-red-500">
+                    {signupForm.formState.errors.phone.message}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Password */}
+            <div className="space-y-2">
+              <Label className="text-sm text-black">Password</Label>
+              <div className="relative">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <PadlockIcon />
+                </div>
+                <Input
+                  type="password"
+                  placeholder="********"
+                  disabled={isPending}
+                  className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10"
+                  {...(isLogin
+                    ? loginForm.register("password")
+                    : signupForm.register("password"))}
+                />
+              </div>
+              {isLogin
+                ? loginForm.formState.errors.password && (
+                    <p className="text-sm text-red-500">
+                      {loginForm.formState.errors.password.message}
+                    </p>
+                  )
+                : signupForm.formState.errors.password && (
+                    <p className="text-sm text-red-500">
+                      {signupForm.formState.errors.password.message}
+                    </p>
+                  )}
+            </div>
+
+            {/* Register Only - Confirm Password */}
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label className="text-sm text-black">Confirm Password</Label>
+                <div className="relative">
+                  <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
+                    <PadlockIcon />
+                  </div>
+                  <Input
+                    type="password"
+                    placeholder="********"
+                    disabled={isPending}
+                    className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10"
+                    {...signupForm.register("confirmPassword")}
+                  />
+                </div>
+                {signupForm.formState.errors.confirmPassword && (
+                  <p className="text-sm text-red-500">
+                    {signupForm.formState.errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Login Only - Forgot Password */}
             {isLogin && (
               <div className="text-right">
                 <Link
                   href="/forgot-password"
-                  className="text-sm text-[var(--backtext)] hover:underline"
-                >
+                  className="text-sm text-(--backtext)">
                   Forgot password?
                 </Link>
               </div>
             )}
-      
-            <Button className="w-full bg-[var(--buttcol)] hover:bg-[var(--secondary-foreground)] text-[var(--foreground)] h-11 rounded-lg">
-              {isLogin ? "Sign In" : "Create Account"}
+          </>
+        )}
+
+        {/* ========== STEP 2 FIELDS (Register Only) ========== */}
+        {!isLogin && step === 2 && (
+          <>
+            {/* Date of Birth */}
+            <div className="space-y-2">
+              <Label className="text-sm text-black">Date of Birth</Label>
+              <div className="relative">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <CalendarIcon className="w-4 h-4" />
+                </div>
+                <Input
+                  type="date"
+                  disabled={isPending}
+                  className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10"
+                  {...signupForm.register("dob")}
+                />
+              </div>
+              {signupForm.formState.errors.dob && (
+                <p className="text-sm text-red-500">
+                  {signupForm.formState.errors.dob.message}
+                </p>
+              )}
+            </div>
+
+            {/* Address */}
+            <div className="space-y-2">
+              <Label className="text-sm text-black">Address</Label>
+              <div className="relative">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
+                  <MapPinIcon className="w-4 h-4" />
+                </div>
+                <Input
+                  type="text"
+                  placeholder="123 Main Street, Lagos"
+                  disabled={isPending}
+                  className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10"
+                  {...signupForm.register("address")}
+                />
+              </div>
+              {signupForm.formState.errors.address && (
+                <p className="text-sm text-red-500">
+                  {signupForm.formState.errors.address.message}
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Error Display */}
+        {error && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        )}
+
+        {/* Buttons */}
+        {isLogin ? (
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="w-full bg-(--buttcol) hover:bg-secondary-foreground text-foreground h-11 rounded-lg">
+            {isPending ? "Loading..." : "Sign In"}
+          </Button>
+        ) : step === 1 ? (
+          <Button
+            type="button"
+            onClick={handleNextStep}
+            disabled={isPending}
+            className="w-full bg-(--buttcol) hover:bg-secondary-foreground text-foreground h-11 rounded-lg">
+            Continue
+          </Button>
+        ) : (
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              onClick={() => setStep(1)}
+              disabled={isPending}
+              variant="outline"
+              className="flex-1 h-11 rounded-lg">
+              Back
             </Button>
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="flex-1 bg-(--buttcol) hover:bg-secondary-foreground text-foreground h-11 rounded-lg">
+              {isPending ? "Creating..." : "Create Account"}
+            </Button>
+          </div>
+        )}
+      </form>
     </CardWrapper>
   );
 };

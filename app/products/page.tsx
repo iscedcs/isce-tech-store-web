@@ -28,6 +28,7 @@ export default function ProductsCategoryPage() {
       price: product.price,
       quantity: 1,
       selectedColor: product.colors[0],
+      image: product.imageSrc,
     });
 
     toast({

@@ -48,6 +48,7 @@ export default function ProductCard({
       price,
       quantity: 1,
       selectedColor: colors[0] || "Default",
+      image: imageSrc || "/products/placeholder.png",
     });
 
     toast({

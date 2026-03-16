@@ -33,7 +33,7 @@ export const FormInput = ({
         <Input
           type={type}
           placeholder={placeholder}
-          className={`h-11 rounded-lg bg-[var(--inputcol)] border border-[var(--inputbor)] ${
+          className={`h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) ${
             svg ? "pl-10" : "pl-4"
           }`}
         />
