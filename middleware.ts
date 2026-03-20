@@ -1,10 +1,10 @@
 import NextAuth from "next-auth";
 import authConfig from "./auth.config";
 import {
-  publicRoutes,
-  authRoutes,
   apiAuthPrefix,
-  DEFAULT_LOGIN_REDIRECT,
+  authRoutes,
+  getRoleLoginRedirect,
+  publicRoutes,
 } from "./routes";
 
 const { auth } = NextAuth(authConfig);
@@ -12,6 +12,8 @@ const { auth } = NextAuth(authConfig);
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
+  const resolvedUserType =
+    (req.auth as any)?.user?.userType || (req.auth as any)?.userType || "USER";
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute =
@@ -27,7 +29,9 @@ export default auth((req) => {
   // Redirect authenticated users away from auth pages
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      return Response.redirect(
+        new URL(getRoleLoginRedirect(resolvedUserType), nextUrl),
+      );
     }
     return;
   }
@@ -46,7 +50,7 @@ export default auth((req) => {
 
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
     return Response.redirect(
-      new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl)
+      new URL(`/login?callbackUrl=${encodedCallbackUrl}`, nextUrl),
     );
   }
 

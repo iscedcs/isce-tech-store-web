@@ -66,6 +66,10 @@ export async function verifyPayment(orderId: string, reference: string) {
         state: string;
         deliveryMethod: string;
         pickupLocation: string | null;
+        stationId?: number | null;
+        areaId?: string | null;
+        latitude?: number | null;
+        longitude?: number | null;
       };
     };
 
@@ -110,6 +114,38 @@ export async function verifyPayment(orderId: string, reference: string) {
     if (!confirmOrder) {
       console.error(`Order ${order.id} not found after creation`);
       return { success: false, message: "Order creation failed" };
+    }
+
+    // Order created with status PAID — admin will review and move to PROCESSING to trigger shipment
+
+    // Send order confirmation email to customer
+    try {
+      // Refetch order with product details for email
+      const fullOrder = await db.order.findUnique({
+        where: { id: order.id },
+        include: {
+          orderItems: { include: { product: true } },
+          shippingInfo: true,
+        },
+      });
+      if (!fullOrder) throw new Error("Order not found for email");
+      const { orderItems, shippingInfo, totalAmount } = fullOrder;
+      const { firstName, lastName, email: customerEmail } = shippingInfo || {};
+      const { orderPaidTemplate } = await import("@/lib/mail-templates");
+      const { sendMail } = await import("@/lib/mail");
+      const html = orderPaidTemplate({
+        customerName: `${firstName || "Customer"} ${lastName || ""}`.trim(),
+        orderId: order.id,
+        order: { orderItems, totalAmount },
+        shippingInfo,
+      });
+      await sendMail({
+        to: customerEmail ?? "",
+        subject: `Order #${order.id} confirmed – ISCE Store`,
+        html,
+      });
+    } catch (err) {
+      console.error("[Mail] Failed to send order confirmation email:", err);
     }
 
     // Call ISCE Auth to request device tokens

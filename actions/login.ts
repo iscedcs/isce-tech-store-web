@@ -1,8 +1,8 @@
 "use server";
 
-import { signIn } from "@/auth";
+import { auth, signIn } from "@/auth";
 import { loginFormSchema, LoginFormValues } from "@/lib/schemas";
-import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { DEFAULT_LOGIN_REDIRECT, getRoleLoginRedirect } from "@/routes";
 import { AuthError } from "next-auth";
 import { revalidatePath } from "next/cache";
 
@@ -29,7 +29,14 @@ export const login = async (
       return { success: false, error: res.error || "Authentication failed" };
     }
 
-    const redirectUrl = callbackUrl || DEFAULT_LOGIN_REDIRECT;
+    let redirectUrl = callbackUrl || DEFAULT_LOGIN_REDIRECT;
+
+    if (!callbackUrl) {
+      const session = await auth();
+      const userType = session?.user?.userType || "USER";
+      redirectUrl = getRoleLoginRedirect(userType);
+    }
+
     revalidatePath(redirectUrl);
 
     return {

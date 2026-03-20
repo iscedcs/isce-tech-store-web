@@ -63,7 +63,7 @@ export default function ProductDetailWrapper({
     <div className="w-full">
       {!isCustomizing ? (
         // Main Product View
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 lg:gap-12">
           {/* Left: Product Image */}
           <ProductImageSection
             title={product.title}

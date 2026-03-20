@@ -6,14 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting product seeding...\n");
 
-  // Clear existing order items first (due to foreign key constraints)
-  await prisma.orderItem.deleteMany();
-  console.log("✓ Cleared existing order items");
-
-  // Clear existing products
-  await prisma.product.deleteMany();
-  console.log("✓ Cleared existing products\n");
-
   // Seed new products
   console.log("📦 Seeding products...\n");
 
@@ -24,6 +16,7 @@ async function main() {
         name: product.name,
         description: product.description,
         price: product.price,
+        weight: 0.00001, // 0.01g per card in kg
         deviceType: product.deviceType,
         images: product.images,
         features: product.features,
@@ -32,7 +25,7 @@ async function main() {
         color: product.color || null,
       },
     });
-    console.log(`  ✓ Seeded: ${created.name} (${created.slug})`);
+    console.log(`  ✓ Seeded: ${created.name} (${created.slug}) - 100g`);
   }
 
   console.log(`\n✅ Successfully seeded ${products.length} products!`);

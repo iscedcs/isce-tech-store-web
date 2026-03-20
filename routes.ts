@@ -21,6 +21,8 @@ export const authRoutes = [
   "/error",
   "/reset",
   "/new-password",
+  "/forgot-password",
+  "/reset-password",
 ];
 
 /**
@@ -34,4 +36,13 @@ export const apiAuthPrefix = "/api/auth";
  * The default redirect path after logging in
  * @type {string}
  */
-export const DEFAULT_LOGIN_REDIRECT = "/";
+export const DEFAULT_LOGIN_REDIRECT = "/profile";
+
+/**
+ * Role-based redirect after authentication
+ */
+export const getRoleLoginRedirect = (userType?: string | null) => {
+  if (userType === "SUPER_ADMIN") return "/superadmin";
+  if (userType === "ADMIN") return "/admin";
+  return "/profile";
+};

@@ -13,47 +13,70 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+// Warehouses/Distribution Centers
+export const warehouses = [
+  {
+    id: 1,
+    name: "YUMARIB Warehouse",
+    address: "34 Oguntolu St, Somolu, Lagos 102216, Lagos, Nigeria",
+    city: "Lagos",
+    state: "Lagos",
+    latitude: 6.5368,
+    longitude: 3.3713,
+  },
+  {
+    id: 2,
+    name: "Chicken Republic Distribution Center",
+    address: "22 Road, Festac Town, Lagos, Nigeria",
+    city: "Lagos",
+    state: "Lagos",
+    latitude: 6.4651,
+    longitude: 3.2851,
+    isDefault: true,
+  },
+  {
+    id: 3,
+    name: "Maruwa Warehouse",
+    address: "Maruwa Bus Stop, Remi Olowude Street, Lekki, Nigeria",
+    city: "Lekki",
+    state: "Lagos",
+    latitude: 6.4298,
+    longitude: 3.4679,
+  },
+];
+
+export const defaultWarehouse =
+  warehouses.find((w) => w.isDefault) || warehouses[1];
+
+// Pickup station fee (in Naira)
+export const PICKUP_STATION_FEE = 750;
+
 // Delivery options with Lagos locations
 export const deliveryOptions = [
   {
     id: "pickup",
     name: "Store Pickup",
     description: "Pick up your order at one of our store locations",
-    price: 0,
+    price: PICKUP_STATION_FEE,
     locations: [
-      {
-        id: "lagos-ikeja",
-        name: "Lagos - Ikeja Store",
-        address: "23 Allen Avenue, Ikeja, Lagos",
-      },
       {
         id: "lagos-lekki",
         name: "Lagos - Lekki Store",
-        address: "12B Admiralty Way, Lekki Phase 1, Lagos",
-      },
-      {
-        id: "lagos-vi",
-        name: "Lagos - Victoria Island",
-        address: "Plot 1415 Adeola Hopewell Street, Victoria Island, Lagos",
+        address:
+          "Plot 1, Polyster Building, Maruwa Bus Stop, 128 Remi Olowude St, Lekki Phase 1, Lagos",
       },
       {
         id: "lagos-festac",
         name: "Lagos - Festac Store",
-        address: "AMG Workspace, Festac Town, Lagos",
+        address: "22rd Festac Tower, AMG Workspace, Festac Town, Lagos",
       },
     ],
   },
   {
-    id: "lagos-delivery",
-    name: "Lagos Delivery",
-    description: "Delivery within Lagos (1-2 business days)",
-    price: 4000,
-  },
-  {
-    id: "nationwide-delivery",
-    name: "Nationwide Delivery",
-    description: "Delivery to other states in Nigeria (3-5 business days)",
-    price: 10000,
+    id: "home-delivery",
+    name: "Home Delivery",
+    description: "Delivery across Nigeria via GIG Logistics",
+    price: 0, // Actual price comes from GIG API
   },
 ];
 

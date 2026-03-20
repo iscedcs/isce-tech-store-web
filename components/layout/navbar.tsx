@@ -4,25 +4,53 @@ import { Input } from "@/components/ui/input";
 import { CartIcon, HeartIcon, HomeIcon, SearchIcon } from "@/lib/icons";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MaxWidthWrapper from "../shared/max-width-wrapper";
 import CartDrawer from "../cart/cart-drawer";
 import { useCartStore } from "@/lib/store/cart-store";
 import { Button } from "../ui/button";
-import { StoreIcon, User, LogOut } from "lucide-react";
+import { StoreIcon, User, LogOut, ShieldCheck } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
+import {
+  CUSTOMER_NAV_LINKS,
+  CUSTOMER_ROLES,
+  ADMIN_NAV_LINKS,
+  ADMIN_ROLES,
+  SUPER_ADMIN_NAV_LINKS,
+} from "@/lib/const";
 
 export default function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const { getTotalItems } = useCartStore();
   const totalItems = getTotalItems();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const isAdmin =
+    session?.user?.userType && ADMIN_ROLES.includes(session.user.userType);
+  const isSuperAdmin = session?.user?.userType === "SUPER_ADMIN";
+  const isRegularUser =
+    !!session?.user?.userType && CUSTOMER_ROLES.includes(session.user.userType);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <>
       <MaxWidthWrapper>
-        <nav className="bg-secondary-dark text-primary-light px-6 py-6 flex justify-between items-center gap-8">
+        <nav className="bg-secondary-dark text-primary-light px-3 sm:px-4 md:px-6 py-3 sm:py-4 md:py-6 flex justify-between items-center gap-2 sm:gap-4 md:gap-8">
           {/* Logo */}
           <Link
             href="/"
@@ -36,20 +64,20 @@ export default function Navbar() {
             />
           </Link>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md bg-primary-foreground">
-            <div className="relative">
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-gray" />
+          {/* Search Bar - Hidden on very small screens */}
+          <div className="hidden sm:flex flex-1 max-w-md bg-primary-foreground">
+            <div className="relative w-full">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-gray w-4 h-4" />
               <Input
                 type="text"
                 placeholder="Search Product....."
-                className="w-full border border-secondary-gray text-primary-light placeholder:text-secondary-gray pl-10 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-blue"
+                className="w-full border border-secondary-gray text-primary-light placeholder:text-secondary-gray pl-10 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-blue text-sm"
               />
             </div>
           </div>
 
           {/* Right Icons */}
-          <div className="flex gap-6 items-center shrink-0">
+          <div className="flex gap-3 sm:gap-4 md:gap-6 items-center shrink-0">
             <Link href="/" className="transition-colors" aria-label="Home">
               <HomeIcon />
             </Link>
@@ -78,13 +106,13 @@ export default function Navbar() {
             </button>
 
             {/* Profile Dropdown */}
-            <div className="relative">
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="bg-transparent cursor-pointer transition-colors hover:opacity-80"
                 aria-label="Profile">
                 {session?.user ? (
-                  <div className="w-8 h-8 bg-gradient-to-br from-accent-blue to-blue-700 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                  <div className="w-8 h-8 bg-linear-to-br from-accent-blue to-blue-700 rounded-full flex items-center justify-center text-white text-sm font-bold">
                     {(session.user.firstName?.[0] || "U").toUpperCase()}
                   </div>
                 ) : (
@@ -94,7 +122,7 @@ export default function Navbar() {
 
               {/* Dropdown Menu */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                <div className="absolute right-0 mt-2 w-56 sm:w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-y-auto">
                   {session?.user ? (
                     <>
                       <div className="px-4 py-3 border-b border-gray-200">
@@ -105,30 +133,50 @@ export default function Navbar() {
                           {session.user.email}
                         </p>
                       </div>
-                      <Link
-                        href="/profile"
-                        onClick={() => setIsProfileOpen(false)}
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-200">
-                        My Profile
-                      </Link>
-                      <Link
-                        href="/profile/orders"
-                        onClick={() => setIsProfileOpen(false)}
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-200">
-                        My Orders
-                      </Link>
-                      <Link
-                        href="/profile/addresses"
-                        onClick={() => setIsProfileOpen(false)}
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-200">
-                        Addresses
-                      </Link>
-                      <Link
-                        href="/profile/settings"
-                        onClick={() => setIsProfileOpen(false)}
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-200">
-                        Settings
-                      </Link>
+
+                      {/* Admin Links */}
+                      {isAdmin && !isSuperAdmin && (
+                        <>
+                          {ADMIN_NAV_LINKS.map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              onClick={() => setIsProfileOpen(false)}
+                              className="flex items-center gap-2 px-4 py-3 text-sm text-indigo-700 hover:bg-indigo-50 border-b border-gray-200">
+                              <ShieldCheck className="w-4 h-4" />
+                              {link.label}
+                            </Link>
+                          ))}
+                        </>
+                      )}
+
+                      {isSuperAdmin && (
+                        <>
+                          {SUPER_ADMIN_NAV_LINKS.map((link) => (
+                            <Link
+                              key={link.href}
+                              href={link.href}
+                              onClick={() => setIsProfileOpen(false)}
+                              className="flex items-center gap-2 px-4 py-3 text-sm text-emerald-700 hover:bg-emerald-50 border-b border-gray-200">
+                              <ShieldCheck className="w-4 h-4" />
+                              {link.label}
+                            </Link>
+                          ))}
+                        </>
+                      )}
+
+                      {/* Customer Links */}
+                      {isRegularUser &&
+                        CUSTOMER_NAV_LINKS.map((link) => (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setIsProfileOpen(false)}
+                            className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-200">
+                            {link.label}
+                          </Link>
+                        ))}
+
                       <button
                         onClick={async () => {
                           await signOut({ redirectTo: "/" });

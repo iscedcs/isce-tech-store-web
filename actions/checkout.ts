@@ -4,11 +4,11 @@ import { db } from "@/lib/prisma";
 import { checkoutFormSchema } from "@/lib/schemas";
 import { z } from "zod";
 import { createTransaction } from "./paystack";
-import { deliveryOptions } from "@/lib/utils";
 
 export async function submitCheckout({
   formData,
   cartItems,
+  deliveryPrice: clientDeliveryPrice,
 }: {
   formData: z.infer<typeof checkoutFormSchema>;
   cartItems: Array<{
@@ -26,6 +26,7 @@ export async function submitCheckout({
       backDesignUrl?: string | null;
     };
   }>;
+  deliveryPrice?: number;
 }) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -52,6 +53,10 @@ export async function submitCheckout({
     state,
     deliveryMethod,
     pickupLocation,
+    stationId,
+    areaId,
+    latitude,
+    longitude,
   } = validatedFields.data;
 
   try {
@@ -69,11 +74,13 @@ export async function submitCheckout({
     }, 0);
 
     const vatAmount = totalWithCustomization * 0.075;
-    const selectedDelivery = deliveryOptions.find(
-      (option) => option.id === deliveryMethod,
-    );
 
-    const deliveryPrice = selectedDelivery?.price || 0;
+    // Use GIG-calculated delivery price from client; pickup has a flat fee
+    const PICKUP_STATION_FEE = 750;
+    const deliveryPrice =
+      deliveryMethod === "pickup"
+        ? PICKUP_STATION_FEE
+        : (clientDeliveryPrice ?? 0);
     const totalAmount = totalWithCustomization + vatAmount + deliveryPrice;
 
     console.log("Checkout calculations:", {
@@ -110,6 +117,23 @@ export async function submitCheckout({
     const reference = `${session.user.id}-${Date.now()}`;
 
     // Store pending order data
+    // If pickup, fetch the full pickup location details
+    let pickupLocationDetails = null;
+    if (deliveryMethod === "pickup" && stationId && pickupLocation) {
+      try {
+        const { getPickupLocations } = await import("@/actions/gig");
+        const locationsResult = await getPickupLocations(Number(stationId));
+        if (locationsResult.success && Array.isArray(locationsResult.data)) {
+          pickupLocationDetails =
+            locationsResult.data.find(
+              (loc) => String(loc.ServiceCentreId) === String(pickupLocation),
+            ) || null;
+        }
+      } catch (e) {
+        console.error("Failed to fetch pickup location details", e);
+      }
+    }
+
     const pendingOrder = {
       userId: session.user.id,
       email,
@@ -139,6 +163,13 @@ export async function submitCheckout({
         state,
         deliveryMethod,
         pickupLocation: pickupLocation || null,
+        stationId: stationId || null,
+        areaId: areaId || null,
+        latitude: latitude || null,
+        longitude: longitude || null,
+        // Add full pickup location details if available
+        pickupLocationName: pickupLocationDetails?.ServiceCentreName || null,
+        pickupLocationAddress: pickupLocationDetails?.Address || null,
       },
     };
 

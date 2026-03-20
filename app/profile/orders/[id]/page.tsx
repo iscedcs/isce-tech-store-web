@@ -4,20 +4,20 @@ import { formatCurrency } from "@/lib/utils";
 import { ArrowLeft, CheckCircle, Clock, Truck } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import OrderTracking from "@/components/profile/order-tracking";
+import { db } from "@/lib/prisma";
 
 async function getOrderDetails(orderId: string, userId: string) {
   try {
-    const response = await fetch(
-      `${process.env.NEXTAUTH_URL}/api/user/orders/${orderId}`,
-      {
-        headers: {
-          "x-user-id": userId,
-        },
-        cache: "no-store",
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      include: {
+        orderItems: { include: { product: true } },
+        shippingInfo: true,
       },
-    );
-    if (!response.ok) return null;
-    return response.json();
+    });
+    if (!order || order.userId !== userId) return null;
+    return order;
   } catch (error) {
     console.error("Failed to fetch order details:", error);
     return null;
@@ -44,10 +44,11 @@ const statusColors: Record<string, string> = {
 export default async function OrderDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await auth();
-  const order = await getOrderDetails(params.id, session?.user?.id || "");
+  const order = await getOrderDetails(id, session?.user?.id || "");
 
   if (!order) {
     notFound();
@@ -68,7 +69,7 @@ export default async function OrderDetailPage({
           Back to Orders
         </Link>
         <h1 className="text-3xl font-bold text-gray-900">
-          Order #{params.id.substring(0, 8).toUpperCase()}
+          Order #{id.substring(0, 8).toUpperCase()}
         </h1>
         <p className="text-gray-600 mt-2">
           Placed on{" "}
@@ -83,7 +84,7 @@ export default async function OrderDetailPage({
       {/* Order Status Timeline */}
       <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
         <div className="flex items-center mb-6">
-          <Badge className={statusColors[order.status] || ""}>
+          <Badge className={statusColors[order.status] || "text-foreground"}>
             {order.status}
           </Badge>
         </div>
@@ -207,21 +208,40 @@ export default async function OrderDetailPage({
       {order.shippingInfo && (
         <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Delivery Address
+            {order.shippingInfo.deliveryMethod === "pickup"
+              ? "Pickup Location"
+              : "Delivery Address"}
           </h2>
           <div className="space-y-2 text-gray-700">
             <p className="font-medium">
               {order.shippingInfo.firstName} {order.shippingInfo.lastName}
             </p>
-            <p>{order.shippingInfo.address}</p>
-            <p>
-              {order.shippingInfo.city}, {order.shippingInfo.state}
-            </p>
+            {order.shippingInfo.deliveryMethod === "pickup" ? (
+              <>
+                {order.shippingInfo.pickupLocationName && (
+                  <p>{order.shippingInfo.pickupLocationName}</p>
+                )}
+                <p>
+                  {order.shippingInfo.pickupLocationAddress ||
+                    order.shippingInfo.address}
+                </p>
+              </>
+            ) : (
+              <>
+                <p>{order.shippingInfo.address}</p>
+                <p>
+                  {order.shippingInfo.city}, {order.shippingInfo.state}
+                </p>
+              </>
+            )}
             <p>{order.shippingInfo.phone}</p>
             <p>{order.shippingInfo.email}</p>
           </div>
         </div>
       )}
+
+      {/* Shipment Tracking */}
+      {order.shipmentId && <OrderTracking waybill={order.shipmentId} />}
     </div>
   );
 }

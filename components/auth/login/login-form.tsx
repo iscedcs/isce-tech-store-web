@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { CardWrapper } from "./card-wrapper";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -17,6 +18,7 @@ import {
   CalendarIcon,
   MapPinIcon,
 } from "@/lib/icons";
+import { Eye, EyeOff } from "lucide-react";
 import {
   loginFormSchema,
   signUpFormSchema,
@@ -26,6 +28,7 @@ import {
 import { login } from "@/actions/login";
 import { signup } from "@/actions/sign-up";
 import { toast } from "sonner";
+import { getRoleLoginRedirect } from "@/routes";
 
 interface AuthFormProps {
   type: "login" | "register";
@@ -36,9 +39,12 @@ export const AuthForm = ({ type }: AuthFormProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
+  const { update: updateSession } = useSession();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState(1); // Step 1 or 2 for registration
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
@@ -70,7 +76,16 @@ export const AuthForm = ({ type }: AuthFormProps) => {
 
       if (result.success) {
         toast.success(result.message);
-        router.push(result.redirectUrl || "/");
+        await updateSession();
+
+        const sessionRes = await fetch("/api/auth/session", {
+          cache: "no-store",
+        });
+        const sessionData = await sessionRes.json();
+        const userType = sessionData?.user?.userType || "USER";
+        const nextRedirect = getRoleLoginRedirect(userType);
+
+        router.push(nextRedirect);
         router.refresh();
       } else {
         setError(result.error || "Login failed");
@@ -251,14 +266,24 @@ export const AuthForm = ({ type }: AuthFormProps) => {
                   <PadlockIcon />
                 </div>
                 <Input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="********"
                   disabled={isPending}
-                  className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10"
+                  className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10 pr-10"
                   {...(isLogin
                     ? loginForm.register("password")
                     : signupForm.register("password"))}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {showPassword ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
               </div>
               {isLogin
                 ? loginForm.formState.errors.password && (
@@ -282,12 +307,22 @@ export const AuthForm = ({ type }: AuthFormProps) => {
                     <PadlockIcon />
                   </div>
                   <Input
-                    type="password"
+                    type={showConfirmPassword ? "text" : "password"}
                     placeholder="********"
                     disabled={isPending}
-                    className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10"
+                    className="h-11 rounded-lg bg-(--inputcol) border border-(--inputbor) pl-10 pr-10"
                     {...signupForm.register("confirmPassword")}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    {showConfirmPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
                 {signupForm.formState.errors.confirmPassword && (
                   <p className="text-sm text-red-500">

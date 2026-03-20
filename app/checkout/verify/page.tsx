@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -21,6 +22,8 @@ function VerifyPaymentContent() {
   const [message, setMessage] = useState<string>("");
   const [orderId, setOrderId] = useState<string | null>(null);
 
+  // Prevent double verification
+  const hasVerifiedRef = React.useRef<string | null>(null);
   useEffect(() => {
     const orderId = searchParams.get("orderId");
     const reference = searchParams.get("reference") || orderId;
@@ -30,6 +33,11 @@ function VerifyPaymentContent() {
       setMessage("Missing order information");
       return;
     }
+
+    // Only verify if not already done for this order/reference
+    const key = `${orderId}:${reference}`;
+    if (hasVerifiedRef.current === key) return;
+    hasVerifiedRef.current = key;
 
     const verify = async () => {
       try {
@@ -99,8 +107,8 @@ function VerifyPaymentContent() {
                   <Link href="/products">Continue Shopping</Link>
                 </Button>
                 {orderId && (
-                  <Button className="flex-1" asChild>
-                    <Link href={`/orders/${orderId}`}>View Order</Link>
+                  <Button className="flex-1 text-foreground" asChild>
+                    <Link href={`/profile/orders/${orderId}`}>View Order</Link>
                   </Button>
                 )}
               </div>

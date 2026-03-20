@@ -73,6 +73,10 @@ export async function PUT(
         address: body.address || address.address,
         city: body.city || address.city,
         state: body.state || address.state,
+        latitude:
+          body.latitude !== undefined ? body.latitude : address.latitude,
+        longitude:
+          body.longitude !== undefined ? body.longitude : address.longitude,
         isDefault:
           body.isDefault !== undefined ? body.isDefault : address.isDefault,
       },

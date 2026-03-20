@@ -7,9 +7,9 @@ export default function ProductGrid() {
   const products = Object.values(PRODUCTS);
 
   return (
-    <section className="bg-primary-light px-6 py-12">
+    <section className="bg-primary-light px-4 sm:px-6 py-8 sm:py-12">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {products.map((product) => (
             <ProductCard
               key={product.slug}

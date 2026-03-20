@@ -84,13 +84,30 @@ export const checkoutFormSchema = z
     lastName: z.string().min(1, "Last name is required"),
     email: z.string().email("Invalid email address"),
     phone: z.string().regex(/^\+?[\d\s-]{10,}$/, "Invalid phone number"),
-    address: z.string().min(1, "Address is required"),
-    city: z.string().min(1, "City is required"),
-    state: z.string().min(1, "State is required"),
-    deliveryMethod: z.enum(["pickup", "lagos-delivery", "nationwide-delivery"]),
+    address: z.string().optional().default(""),
+    city: z.string().optional().default(""),
+    state: z.string().optional().default(""),
+    deliveryMethod: z.enum(["pickup", "home-delivery"]),
     pickupLocation: z.string().optional(),
+    // GIG Logistics fields
+    stationId: z.number().optional(),
+    areaId: z.string().optional(),
+    latitude: z.number().optional(),
+    longitude: z.number().optional(),
     paymentMethod: z.enum(["paystack"]),
   })
+  .refine(
+    (data) => {
+      if (data.deliveryMethod === "pickup" && !data.stationId) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Station selection is required for store pickup",
+      path: ["stationId"],
+    },
+  )
   .refine(
     (data) => {
       if (data.deliveryMethod === "pickup" && !data.pickupLocation) {
@@ -101,6 +118,21 @@ export const checkoutFormSchema = z
     {
       message: "Pickup location is required for store pickup",
       path: ["pickupLocation"],
+    },
+  )
+  .refine(
+    (data) => {
+      if (
+        data.deliveryMethod === "home-delivery" &&
+        (!data.address || !data.latitude || !data.longitude)
+      ) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Please search and select a delivery address",
+      path: ["address"],
     },
   );
 

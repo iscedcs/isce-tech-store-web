@@ -4,20 +4,17 @@ import { formatCurrency } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { db } from "@/lib/prisma";
 
 async function getUserOrders(userId: string) {
   try {
-    const response = await fetch(
-      `${process.env.NEXTAUTH_URL}/api/user/orders`,
-      {
-        headers: {
-          "x-user-id": userId,
-        },
-        cache: "no-store",
+    return await db.order.findMany({
+      where: { userId },
+      include: {
+        orderItems: { include: { product: true } },
       },
-    );
-    if (!response.ok) return [];
-    return response.json();
+      orderBy: { createdAt: "desc" },
+    });
   } catch (error) {
     console.error("Failed to fetch orders:", error);
     return [];

@@ -5,7 +5,7 @@ export default function MaxWidthWrapper({
   children,
 }: IMaxWidthWrapper) {
   return (
-    <div className={cn("max-w-7xl mx-auto px-5 md:px-10", className)}>
+    <div className={cn("max-w-7xl mx-auto px-4 sm:px-5 md:px-10", className)}>
       {children}
     </div>
   );

@@ -13,6 +13,8 @@ const addressSchema = z.object({
   address: z.string().min(5, "Address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
   isDefault: z.boolean().optional(),
 });
 
@@ -28,6 +30,8 @@ export interface SavedAddress {
   address: string;
   city: string;
   state: string;
+  latitude: number | null;
+  longitude: number | null;
   isDefault: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -94,7 +98,7 @@ export async function getDefaultAddress(): Promise<{
 
 // Create a new saved address
 export async function createSavedAddress(
-  input: AddressInput
+  input: AddressInput,
 ): Promise<{ success: boolean; data?: SavedAddress; error?: string }> {
   try {
     const session = await auth();
@@ -110,7 +114,7 @@ export async function createSavedAddress(
       };
     }
 
-    const { isDefault, ...data } = validated.data;
+    const { isDefault, latitude, longitude, ...data } = validated.data;
 
     // If this is set as default, unset other defaults first
     if (isDefault) {
@@ -128,6 +132,8 @@ export async function createSavedAddress(
     const address = await db.savedAddress.create({
       data: {
         ...data,
+        latitude: latitude ?? null,
+        longitude: longitude ?? null,
         userId: session.user.id,
         isDefault: isDefault || existingCount === 0,
       },
@@ -135,16 +141,19 @@ export async function createSavedAddress(
 
     revalidatePath("/checkout");
     return { success: true, data: address };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating address:", error);
-    return { success: false, error: "Failed to create address" };
+    return {
+      success: false,
+      error: error?.message || "Failed to create address",
+    };
   }
 }
 
 // Update an existing saved address
 export async function updateSavedAddress(
   id: string,
-  input: Partial<AddressInput>
+  input: Partial<AddressInput>,
 ): Promise<{ success: boolean; data?: SavedAddress; error?: string }> {
   try {
     const session = await auth();
@@ -189,7 +198,7 @@ export async function updateSavedAddress(
 
 // Delete a saved address
 export async function deleteSavedAddress(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await auth();
@@ -233,7 +242,7 @@ export async function deleteSavedAddress(
 
 // Set an address as default
 export async function setDefaultAddress(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const session = await auth();

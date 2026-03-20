@@ -1,18 +1,38 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export default function SettingsPage() {
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const [isLinkingGoogle, setIsLinkingGoogle] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
+
+  useEffect(() => {
+    const googleLinked = searchParams.get("googleLinked");
+    const oauthError = searchParams.get("error");
+
+    if (googleLinked === "1") {
+      toast.success("Google account connected successfully.");
+    }
+
+    if (oauthError === "OAuthAccountNotLinked") {
+      toast.error(
+        "Google account is already linked to another login method. Please sign in with your password first.",
+      );
+    }
+  }, [searchParams]);
 
   const [formData, setFormData] = useState({
     firstName: session?.user?.firstName || "",
@@ -120,6 +140,31 @@ export default function SettingsPage() {
     }
   };
 
+  const handleGoogleLink = async () => {
+    setIsLinkingGoogle(true);
+
+    try {
+      const callbackUrl = "/profile/settings?googleLinked=1";
+      const response = await signIn("google", {
+        callbackUrl,
+        redirect: false,
+      });
+
+      if (response?.error) {
+        toast.error("Unable to connect Google account. Please try again.");
+      }
+
+      if (response?.url) {
+        window.location.href = response.url;
+        return;
+      }
+    } catch {
+      toast.error("Unable to connect Google account. Please try again.");
+    } finally {
+      setIsLinkingGoogle(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -137,9 +182,9 @@ export default function SettingsPage() {
               : "bg-red-50 border border-red-200 text-red-800"
           }`}>
           {message.type === "success" ? (
-            <CheckCircle className="w-5 h-5 flex-shrink-0" />
+            <CheckCircle className="w-5 h-5 flex shrink-0" />
           ) : (
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <AlertCircle className="w-5 h-5 flex shrink-0" />
           )}
           <p className="text-sm">{message.text}</p>
         </div>
@@ -227,7 +272,7 @@ export default function SettingsPage() {
                 name="newPassword"
                 value={formData.newPassword}
                 onChange={handleInputChange}
-                className="w-full"
+                className="w-full "
                 placeholder="Enter new password"
               />
             </div>
@@ -255,6 +300,22 @@ export default function SettingsPage() {
             {isLoading ? "Updating..." : "Update Password"}
           </Button>
         </form>
+      </div>
+
+      <div className="border border-gray-200 rounded-lg p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">
+          Connected Accounts
+        </h2>
+        <p className="text-sm text-gray-600 mb-6">
+          Link Google to this account for faster sign-in.
+        </p>
+        <Button
+          type="button"
+          onClick={handleGoogleLink}
+          disabled={isLinkingGoogle}
+          className="bg-accent-blue text-white hover:bg-blue-700">
+          {isLinkingGoogle ? "Connecting..." : "Connect Google"}
+        </Button>
       </div>
     </div>
   );

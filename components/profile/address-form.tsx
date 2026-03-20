@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, AlertCircle } from "lucide-react";
+import { LocationSearch } from "@/components/checkout/location-search";
 
 interface AddressFormProps {
   addressId?: string | null;
@@ -66,6 +67,8 @@ export default function AddressForm({
     address: "",
     city: "",
     state: "",
+    latitude: null as number | null,
+    longitude: null as number | null,
     isDefault: false,
   });
 
@@ -149,33 +152,33 @@ export default function AddressForm({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <button
         onClick={onClose}
-        className="flex items-center gap-2 text-accent-blue hover:underline">
+        className="flex items-center gap-2 text-accent-blue hover:underline text-sm sm:text-base">
         <ArrowLeft className="w-4 h-4" />
         Back
       </button>
 
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2 className="text-lg sm:text-2xl font-bold text-gray-900">
           {addressId ? "Edit Address" : "Add New Address"}
         </h2>
       </div>
 
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg">
-          <AlertCircle className="w-5 h-5 flex-shrink-0" />
-          <p className="text-sm">{error}</p>
+        <div className="flex items-center gap-3 p-3 sm:p-4 bg-red-50 border border-red-200 text-red-800 rounded-lg text-sm">
+          <AlertCircle className="w-5 h-5 flex shrink-0" />
+          <p>{error}</p>
         </div>
       )}
 
       <form
         onSubmit={handleSubmit}
-        className="space-y-6 border border-gray-200 rounded-lg p-6">
+        className="space-y-4 sm:space-y-6 border border-gray-200 rounded-lg p-4 sm:p-6">
         {/* Address Label */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
             Address Label (e.g., Home, Office)
           </label>
           <Input
@@ -184,15 +187,15 @@ export default function AddressForm({
             value={formData.label}
             onChange={handleInputChange}
             placeholder="e.g., Home, Office, Mom's place"
-            className="w-full"
+            className="w-full text-sm"
             required
           />
         </div>
 
         {/* Name */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
               First Name
             </label>
             <Input
@@ -242,15 +245,24 @@ export default function AddressForm({
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Street Address
           </label>
-          <Input
-            type="text"
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-            placeholder="Street address"
-            className="w-full"
-            required
+          <LocationSearch
+            onLocationSelect={(location) => {
+              setFormData((prev) => ({
+                ...prev,
+                address: location.address,
+                city: location.city,
+                state: location.state,
+                latitude: location.latitude,
+                longitude: location.longitude,
+              }));
+            }}
+            placeholder="Search for your address"
           />
+          {formData.address && (
+            <p className="mt-1 text-sm text-gray-500 truncate">
+              {formData.address}
+            </p>
+          )}
         </div>
 
         {/* City */}

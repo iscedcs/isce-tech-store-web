@@ -1,7 +1,6 @@
 import { auth } from "@/auth";
+import { getRoleLoginRedirect } from "@/routes";
 import { redirect } from "next/navigation";
-import ProfileSidebar from "@/components/profile/profile-sidebar";
-import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 
 export default async function ProfileLayout({
   children,
@@ -14,16 +13,16 @@ export default async function ProfileLayout({
     redirect("/login");
   }
 
-  return (
-    <MaxWidthWrapper>
-      <div className="min-h-screen bg-primary-light py-8">
-        {/* Sidebar */}
+  const userType = session.user?.userType || "USER";
+  if (userType !== "USER") {
+    redirect(getRoleLoginRedirect(userType));
+  }
 
-        {/* Main Content */}
-        <div className="lg:col-span-3 rounded-lg shadow-sm p-6 border border-gray-200">
-          {children}
-        </div>
-      </div>
-    </MaxWidthWrapper>
+  return (
+    <div className="min-h-screen bg-foreground">
+      <main className="px-4 sm:px-6 max-w-7xl mx-auto lg:px-8 py-20">
+        {children}
+      </main>
+    </div>
   );
 }
