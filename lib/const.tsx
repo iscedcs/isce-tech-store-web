@@ -170,3 +170,98 @@ export const PRODUCT_CATEGORIES = [
   "SMART DEVICE",
   "ACCESSORIES",
 ];
+
+export const AUTH_API = process.env.ISCE_AUTH_BACKEND_URL;
+export const baseUrl = process.env.NEXT_PUBLIC_API_URL;
+export const GIG_Logistics = process.env.NEXT_PUBLIC_GIG_BASE_URL;
+
+// GIG Logistics Endpoints
+export const GIG_ENDPOINTS = {
+  auth: {
+    login: "/login",
+  },
+  price: {
+    shipment: "/price/v3",
+    bulk_shipment: "/price/bulk",
+    drop_off_shipment: "/dropOff/price",
+  },
+  shipment: {
+    create: "/capture/preshipment",
+    create_bulk_shipment: "/capture/bulk/preshipment",
+    track: "/track/mobileShipment",
+    track_multiple: "/track/multipleMobileShipment",
+    get_shipment_details: "/get/preshipment",
+  },
+  geographical: {
+    all_local_stations: "/localstations/get",
+    all_international_stations: "/internationalStations/get",
+    get_pickup_locations: "/serviceCentresByStation",
+    home_delivery: "/homedelivery/active",
+  },
+  company: {
+    get_company_info: "/companyDetails/get",
+  },
+  wallet: {
+    marchant_wallet: "/chargeWallet",
+  },
+  invoice: {
+    generate: "/invoice/generate",
+  },
+};
+
+export const URLS = {
+  auth: {
+    sign_up: "/auth/signup",
+    sign_in: "/auth/signin",
+    sign_out: "/auth/signout",
+    reset_token: "/auth/send-reset-token",
+    reset_password: "/auth/reset-password",
+  },
+  user: {
+    one: "/user/one/{id}",
+  },
+  device: {
+    request_token: "/device/request-token",
+    create: "/device/create",
+  },
+};
+
+const DEVICE_TYPE_MAPPING = {
+  CARD: "6214bdef7dbcb",
+  WRISTBAND: "6214bdef6dbcb",
+  STICKER: "6214bdef5dbcb",
+  KEYCHAIN: "6214bdef4dbcb",
+};
+
+// ============================================================
+// NAVIGATION ROUTES
+// ============================================================
+
+export interface NavLink {
+  label: string;
+  href: string;
+  icon?: string;
+}
+
+export const CUSTOMER_NAV_LINKS: NavLink[] = [
+  { label: "My Profile", href: "/profile", icon: "User" },
+  { label: "My Orders", href: "/profile/orders", icon: "Package" },
+  { label: "Addresses", href: "/profile/addresses", icon: "MapPin" },
+  { label: "Settings", href: "/profile/settings", icon: "Settings" },
+];
+
+export const ADMIN_NAV_LINKS: NavLink[] = [
+  { label: "Admin Dashboard", href: "/admin", icon: "LayoutDashboard" },
+  { label: "Manage Orders", href: "/admin/orders", icon: "ClipboardList" },
+];
+
+export const SUPER_ADMIN_NAV_LINKS: NavLink[] = [
+  { label: "Superadmin Dashboard", href: "/superadmin", icon: "ShieldCheck" },
+  { label: "Company Info", href: "/superadmin/company", icon: "Building2" },
+  { label: "Charge Wallet", href: "/superadmin/wallet", icon: "Wallet" },
+  { label: "Invoices", href: "/superadmin/invoices", icon: "FileText" },
+];
+
+export const CUSTOMER_ROLES = ["USER"];
+export const ADMIN_ROLES = ["ADMIN", "SUPER_ADMIN"];
+export const SUPER_ADMIN_ROLES = ["SUPER_ADMIN"];

@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { PRODUCTS } from "@/lib/const";
 import { TrashIcon } from "@/lib/icons";
 import { CartItem, useCartStore } from "@/lib/store/cart-store";
+import { formatCurrency } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -14,15 +16,13 @@ interface CartDrawerProps {
 
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { items, removeItem, updateQuantity, getTotalPrice } = useCartStore();
+  const router = useRouter();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const handleCheckout = () => {
     setIsCheckingOut(true);
-    // Checkout logic will be implemented later
-    setTimeout(() => {
-      setIsCheckingOut(false);
-      onClose();
-    }, 1500);
+    onClose();
+    router.push("/checkout");
   };
 
   return (
@@ -37,21 +37,23 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-md bg-secondary-dark-2 border-l border-secondary-gray z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
+        className={`fixed top-0 right-0 h-full w-full sm:max-w-md bg-secondary-dark-2 border-l border-secondary-gray z-50 transform transition-transform duration-300 ease-in-out flex flex-col ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-secondary-gray">
-          <h2 className="text-xl font-bold text-primary-light">Your Cart</h2>
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-secondary-gray">
+          <h2 className="text-lg sm:text-xl font-bold text-primary-light">
+            Your Cart
+          </h2>
           <button
             onClick={onClose}
-            className="text-secondary-gray hover:text-primary-light transition-colors text-2xl">
+            className="text-secondary-gray hover:text-primary-light transition-colors text-xl sm:text-2xl">
             ✕
           </button>
         </div>
 
         {/* Items */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 sm:space-y-4">
           {items.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-secondary-foreground mb-4">
@@ -79,14 +81,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t border-secondary-gray p-6 space-y-4">
+          <div className="border-t border-secondary-gray p-4 sm:p-6 space-y-3 sm:space-y-4">
             {/* Total */}
             <div className="flex justify-between items-center">
-              <span className="text-primary-light font-semibold">
+              <span className="text-primary-light font-semibold text-sm sm:text-base">
                 Subtotal:
               </span>
-              <span className="text-2xl font-bold text-accent-blue">
-                ₦{getTotalPrice().toLocaleString()}
+              <span className="text-lg sm:text-2xl font-bold text-accent-blue">
+                {formatCurrency(getTotalPrice())}
               </span>
             </div>
 
@@ -94,18 +96,14 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             <button
               onClick={handleCheckout}
               disabled={isCheckingOut}
-              className={`w-full py-3 rounded-lg font-semibold transition-colors ${
-                isCheckingOut
-                  ? "bg-secondary-gray text-secondary-foreground cursor-not-allowed"
-                  : "bg-accent-blue text-primary hover:bg-accent-blue-light"
-              }`}>
+              className="w-full py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base transition-colors bg-accent-blue text-primary hover:bg-accent-blue-light disabled:opacity-50">
               {isCheckingOut ? "Processing..." : "Proceed to Checkout"}
             </button>
 
             {/* Continue Shopping */}
             <button
               onClick={onClose}
-              className="w-full py-3 rounded-lg font-semibold border border-secondary-gray text-primary-light hover:border-accent-blue transition-colors">
+              className="w-full py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base border border-secondary-gray text-primary-light hover:border-accent-blue transition-colors">
               Continue Shopping
             </button>
           </div>
@@ -129,10 +127,10 @@ function CartItemCard({
   onUpdateQuantity,
 }: CartItemCardProps) {
   return (
-    <div className="bg-primary-light/10 opacity- rounded-lg p-4 border border-secondary-gray">
+    <div className="bg-primary-light/10 opacity- rounded-lg p-3 sm:p-4 border border-secondary-gray">
       {/* Product Info */}
-      <div className="flex gap-4 mb-4">
-        <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-secondary-dark">
+      <div className="flex gap-3 mb-4">
+        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden shrink-0 bg-secondary-dark">
           <Image
             src={product.imageSrc}
             alt={item.title}
@@ -141,7 +139,7 @@ function CartItemCard({
           />
         </div>
         <div className="flex-1">
-          <h3 className="text-primary-light font-semibold text-sm">
+          <h3 className="text-primary-light font-semibold text-xs sm:text-sm line-clamp-2">
             {item.title}
           </h3>
           {item.selectedColor && (
@@ -149,7 +147,7 @@ function CartItemCard({
               Color: {item.selectedColor}
             </p>
           )}
-          <p className="text-accent-blue font-semibold mt-2">
+          <p className="text-accent-blue font-semibold text-sm sm:text-base mt-2">
             ₦{item.price.toLocaleString()}
           </p>
         </div>

@@ -48,6 +48,7 @@ export default function ProductCard({
       price,
       quantity: 1,
       selectedColor: colors[0] || "Default",
+      image: imageSrc || "/products/placeholder.png",
     });
 
     toast({
@@ -79,10 +80,14 @@ export default function ProductCard({
         </div>
 
         {/* Content */}
-        <div className="p-4 flex flex-col h-full justify-between">
+        <div className="p-3 sm:p-4 flex flex-col h-full justify-between">
           <div>
-            <h3 className="text-primary-light font-bold mb-2">{title}</h3>
-            <p className="text-secondary-gray text-sm mb-4">{description}</p>
+            <h3 className="text-primary-light font-bold mb-2 text-sm sm:text-base line-clamp-2">
+              {title}
+            </h3>
+            <p className="text-secondary-gray text-xs sm:text-sm mb-4 line-clamp-2">
+              {description}
+            </p>
 
             {/* Rating */}
             <div className="flex items-center gap-2 mb-4">
@@ -90,7 +95,7 @@ export default function ProductCard({
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star
                     key={i}
-                    size={14}
+                    size={12}
                     className={
                       i < Math.floor(rating)
                         ? "fill-yellow-500 text-yellow-500"
@@ -103,15 +108,15 @@ export default function ProductCard({
                 ({reviewCount})
               </span>
             </div>
-            <div className="flex justify-between items-center pt-4 ">
-              <span className="font-bold text-lg text-accent-blue">
+            <div className="flex justify-between items-center pt-4 gap-2">
+              <span className="font-bold text-sm sm:text-lg text-accent-blue">
                 ₦{price.toLocaleString()}
               </span>
               <Button
                 onClick={handleAddToCart}
                 variant="ghost"
                 size="sm"
-                className="bg-secondary-dark px-4 gap-2 hover:bg-accent-blue text-primary-light hover:text-primary-foreground transition-colors">
+                className="bg-secondary-dark px-2 sm:px-4 gap-1 sm:gap-2 hover:bg-accent-blue text-primary-light hover:text-primary-foreground transition-colors text-xs sm:text-sm">
                 <CartIcon /> Add
               </Button>
             </div>

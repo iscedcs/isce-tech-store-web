@@ -1,0 +1,128 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id             String      @id @default(uuid())
+  slug           String      @unique
+  name           String
+  description    String?
+  price          Float
+  weight         Float? // Weight in kg (e.g., 0.00001 kg per card)
+  deviceType     DeviceType
+  images         String[]
+  features       String[]
+  stock          Int
+  isCustomizable Boolean     @default(false)
+  color          String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  orderItems     OrderItem[]
+}
+
+model Order {
+  id             String        @id @default(uuid())
+  userId         String
+  totalAmount    Float
+  vatAmount      Float
+  deliveryPrice  Float
+  deviceType     DeviceType
+  status         OrderStatus   @default(PENDING)
+  transactionId  String?
+  shipmentId     String? // GIG Logistics shipment reference ID
+  shipmentStatus String? // Current GIG tracking status (e.g., MCRT, MAPT, MPIK)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  orderItems     OrderItem[]
+  shippingInfo   ShippingInfo?
+}
+
+model OrderItem {
+  id               String   @id @default(uuid())
+  orderId          String
+  productId        String
+  quantity         Int
+  unitPrice        Float
+  customizationFee Float?
+  designServiceFee Float?
+  cardColor        String?
+  frontDesignUrl   String?
+  backDesignUrl    String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model PendingOrder {
+  id        String   @id @default(cuid())
+  reference String   @unique
+  data      Json
+  createdAt DateTime @default(now())
+}
+
+model ShippingInfo {
+  id                    String   @id @default(uuid())
+  orderId               String   @unique
+  userId                String
+  firstName             String
+  lastName              String
+  email                 String
+  phone                 String
+  address               String
+  city                  String
+  state                 String
+  latitude              Float? // Delivery location latitude (for validation)
+  longitude             Float? // Delivery location longitude (for validation)
+  deliveryMethod        String
+  pickupLocation        String?
+  pickupLocationName    String?
+  pickupLocationAddress String?
+  stationId             Int? // GIG station ID for pickup location
+  areaId                String? // GIG area ID for home delivery
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  order                 Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+// User's saved shipping addresses for quick checkout
+model SavedAddress {
+  id        String   @id @default(uuid())
+  userId    String
+  label     String // e.g., "Home", "Office", "Mom's place"
+  firstName String
+  lastName  String
+  phone     String
+  address   String
+  city      String
+  state     String
+  latitude  Float? // For shipping cost calculation
+  longitude Float? // For shipping cost calculation
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  PENDING
+  FAILED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum DeviceType {
+  CARD
+  WRISTBAND
+  STICKER
+  KEYCHAIN
+}

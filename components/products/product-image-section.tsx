@@ -14,10 +14,10 @@ export default function ProductImageSection({
   badge = "NFC",
 }: ProductImageSectionProps) {
   return (
-    <div className="flex flex-col gap-4">
-      <div className="relative bg-secondary-dark-3 border border-secondary-gray rounded-2xl overflow-hidden aspect-square flex items-center justify-center">
-        <div className="absolute top-4 right-4 z-10">
-          <span className="inline-block bg-primary text-primary-light text-xs font-semibold px-3 py-1 rounded-full">
+    <div className="flex flex-col gap-2 sm:gap-3 md:gap-4">
+      <div className="relative bg-secondary-dark-3 border border-secondary-gray rounded-xl sm:rounded-2xl overflow-hidden aspect-square flex items-center justify-center">
+        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10">
+          <span className="inline-block bg-primary text-primary-light text-xs font-semibold px-2 sm:px-3 py-1 rounded-full">
             {badge}
           </span>
         </div>
@@ -37,7 +37,7 @@ export default function ProductImageSection({
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className="bg-secondary-dark-3 border border-secondary-gray rounded-lg aspect-square flex items-center justify-center cursor-pointer hover:border-accent-blue transition-colors overflow-hidden">
+            className="bg-secondary-dark-3 border border-secondary-gray rounded-lg sm:rounded-lg aspect-square flex items-center justify-center cursor-pointer hover:border-accent-blue transition-colors overflow-hidden">
             <Image
               src={imageSrc}
               alt={`${title} view ${i + 1}`}

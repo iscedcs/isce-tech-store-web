@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Mail, Facebook, Twitter, Linkedin, Youtube } from "lucide-react";
 import {
   EmailIcon,
   FacebookIcon,
@@ -15,17 +14,17 @@ export default function TopBanner() {
   return (
     <div className="bg-primary-light text-primary-light">
       <MaxWidthWrapper>
-        <div className=" px-4 py-3 flex justify-between text-primary items-center">
+        <div className="px-4 py-2 sm:py-3 flex flex-col gap-2 sm:flex-row sm:justify-between text-primary items-center">
           {/* Email Section */}
-          <div className="flex items-center gap-2 text-sm">
-            <EmailIcon className="w-5 h-5" />
-            <span>support@isce.tech</span>
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-center sm:text-left">
+            <EmailIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="break-all sm:break-normal">support@isce.tech</span>
           </div>
 
           {/* Social Links */}
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium  ">Follow Us</span>
-            <div className="flex gap-3">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <span className="text-xs sm:text-sm font-medium">Follow Us</span>
+            <div className="flex gap-2 sm:gap-3">
               <a
                 href="https://facebook.com"
                 target="_blank"

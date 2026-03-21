@@ -7,6 +7,8 @@ import Navbar from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { CtaSection } from "@/components/shared/cta-section";
 import { ToastProvider } from "@/components/providers/toast-provider";
+import { auth } from "@/auth";
+import { SessionProvider } from "next-auth/react";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -37,22 +39,28 @@ export const metadata: Metadata = {
   // },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
-    <html lang="en">
-      <body className={`${montserrat.variable} antialiased`}>
-        <ToastProvider>
-          <TopBanner />
-          <Navbar />
-          {children}
-          <CtaSection />
-          <Footer />
-        </ToastProvider>
-      </body>
-    </html>
+    <SessionProvider session={session}>
+      <html lang="en">
+        <body className={`${montserrat.variable} antialiased`}>
+          <ToastProvider>
+            <div className="sticky top-0 z-50">
+              <TopBanner />
+              <Navbar />
+            </div>
+            {children}
+            <CtaSection />
+            <Footer />
+          </ToastProvider>
+        </body>
+      </html>
+    </SessionProvider>
   );
 }
