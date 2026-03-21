@@ -2,18 +2,23 @@ import { auth } from "@/auth";
 import { db } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  context: RouteContext,
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const address = await db.savedAddress.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!address) {
@@ -37,9 +42,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  context: RouteContext,
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -48,7 +54,7 @@ export async function PUT(
     const body = await request.json();
 
     const address = await db.savedAddress.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!address || address.userId !== session.user.id) {
@@ -58,13 +64,13 @@ export async function PUT(
     // If setting as default, remove default from other addresses
     if (body.isDefault) {
       await db.savedAddress.updateMany({
-        where: { userId: session.user.id, id: { not: params.id } },
+        where: { userId: session.user.id, id: { not: id } },
         data: { isDefault: false },
       });
     }
 
     const updatedAddress = await db.savedAddress.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         label: body.label || address.label,
         firstName: body.firstName || address.firstName,
@@ -94,16 +100,17 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  context: RouteContext,
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const address = await db.savedAddress.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!address || address.userId !== session.user.id) {
@@ -111,7 +118,7 @@ export async function DELETE(
     }
 
     await db.savedAddress.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: "Address deleted" });
@@ -126,9 +133,10 @@ export async function DELETE(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  context: RouteContext,
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -137,7 +145,7 @@ export async function PATCH(
     const body = await request.json();
 
     const address = await db.savedAddress.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!address || address.userId !== session.user.id) {
@@ -147,13 +155,13 @@ export async function PATCH(
     // If setting as default, remove default from other addresses
     if (body.isDefault) {
       await db.savedAddress.updateMany({
-        where: { userId: session.user.id, id: { not: params.id } },
+        where: { userId: session.user.id, id: { not: id } },
         data: { isDefault: false },
       });
     }
 
     const updatedAddress = await db.savedAddress.update({
-      where: { id: params.id },
+      where: { id },
       data: body,
     });
 

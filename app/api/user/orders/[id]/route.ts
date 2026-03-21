@@ -2,18 +2,23 @@ import { auth } from "@/auth";
 import { db } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+type RouteContext = {
+  params: Promise<{ id: string }>;
+};
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  context: RouteContext,
 ) {
   try {
+    const { id } = await context.params;
     const session = await auth();
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const order = await db.order.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         orderItems: {
           include: {

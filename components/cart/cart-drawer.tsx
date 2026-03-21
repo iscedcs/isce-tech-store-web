@@ -42,7 +42,9 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         }`}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-secondary-gray">
-          <h2 className="text-lg sm:text-xl font-bold text-primary-light">Your Cart</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-primary-light">
+            Your Cart
+          </h2>
           <button
             onClick={onClose}
             className="text-secondary-gray hover:text-primary-light transition-colors text-xl sm:text-2xl">

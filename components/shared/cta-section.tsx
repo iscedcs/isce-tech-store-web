@@ -16,7 +16,7 @@ export function CtaSection() {
       className="relative py-24 md:py-32 px-6 bg-primary overflow-hidden">
       <div className="max-w-5xl mx-auto relative">
         {/* Large Decorative Arrow Icon (Matches UI image) */}
-        <div className="absolute -top-4 -right-4 md:-top-10 md:-right-10 opacity-20 pointer-events-none">
+        <div className="hidden md:block absolute -top-4 -right-4 md:-top-10 md:-right-10 opacity-20 pointer-events-none">
           <ArrowUpRight
             size={180}
             className="text-secondary-gray stroke-[0.5]"

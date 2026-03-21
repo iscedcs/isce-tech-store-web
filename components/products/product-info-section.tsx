@@ -100,7 +100,9 @@ export default function ProductInfoSection({
 
       {/* Key Benefits */}
       <div className="bg-primary-light rounded-xl shadow-2xl px-4 sm:px-6 py-6 sm:py-8">
-        <h3 className="text-primary font-semibold mb-3 text-sm sm:text-base">Key Features</h3>
+        <h3 className="text-primary font-semibold mb-3 text-sm sm:text-base">
+          Key Features
+        </h3>
         <ul className="space-y-2">
           {features.map((feature, idx) => (
             <li key={idx} className="flex items-start gap-3">

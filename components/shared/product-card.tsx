@@ -82,8 +82,12 @@ export default function ProductCard({
         {/* Content */}
         <div className="p-3 sm:p-4 flex flex-col h-full justify-between">
           <div>
-            <h3 className="text-primary-light font-bold mb-2 text-sm sm:text-base line-clamp-2">{title}</h3>
-            <p className="text-secondary-gray text-xs sm:text-sm mb-4 line-clamp-2">{description}</p>
+            <h3 className="text-primary-light font-bold mb-2 text-sm sm:text-base line-clamp-2">
+              {title}
+            </h3>
+            <p className="text-secondary-gray text-xs sm:text-sm mb-4 line-clamp-2">
+              {description}
+            </p>
 
             {/* Rating */}
             <div className="flex items-center gap-2 mb-4">

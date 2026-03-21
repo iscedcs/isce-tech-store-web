@@ -48,19 +48,25 @@ export default async function ProfileDashboard() {
       {/* Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <p className="text-xs sm:text-sm font-medium text-gray-600">Total Orders</p>
+          <p className="text-xs sm:text-sm font-medium text-gray-600">
+            Total Orders
+          </p>
           <p className="text-xl sm:text-2xl font-bold text-blue-600 mt-1">
             {orders.length}
           </p>
         </div>
         <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-          <p className="text-xs sm:text-sm font-medium text-gray-600">Delivered Orders</p>
+          <p className="text-xs sm:text-sm font-medium text-gray-600">
+            Delivered Orders
+          </p>
           <p className="text-xl sm:text-2xl font-bold text-green-600 mt-1">
             {orders.filter((o: any) => o.status === "DELIVERED").length}
           </p>
         </div>
         <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-          <p className="text-xs sm:text-sm font-medium text-gray-600">Active Orders</p>
+          <p className="text-xs sm:text-sm font-medium text-gray-600">
+            Active Orders
+          </p>
           <p className="text-xl sm:text-2xl font-bold text-purple-600 mt-1">
             {
               orders.filter((o: any) =>
@@ -76,7 +82,9 @@ export default async function ProfileDashboard() {
       {/* Recent Orders */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900">Recent Orders</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+            Recent Orders
+          </h2>
           {orders.length > 5 && (
             <Link
               href="/profile/orders"
@@ -123,7 +131,9 @@ export default async function ProfileDashboard() {
           </div>
         ) : (
           <div className="text-center py-6 sm:py-8 border border-gray-200 rounded-lg">
-            <p className="text-xs sm:text-sm text-gray-500 mb-4">No orders yet</p>
+            <p className="text-xs sm:text-sm text-gray-500 mb-4">
+              No orders yet
+            </p>
             <Link
               href="/products"
               className="inline-block bg-accent-blue text-white px-4 sm:px-6 py-2 rounded-lg text-sm sm:text-base hover:bg-blue-700 transition-colors">

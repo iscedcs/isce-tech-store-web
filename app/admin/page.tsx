@@ -141,7 +141,9 @@ export default async function AdminDashboard() {
       {/* Recent Orders */}
       <div>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-900">Recent Orders</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+            Recent Orders
+          </h2>
           <Link
             href="/admin/orders"
             className="text-xs sm:text-sm text-accent-blue hover:underline flex items-center gap-1">

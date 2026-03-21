@@ -8,16 +8,29 @@ import { Button } from "@/components/ui/button";
 import { CartIcon } from "@/lib/icons";
 import { useCartStore } from "@/lib/store/cart-store";
 import { useToastContext } from "@/components/providers/toast-provider";
+import { useSearchParams } from "next/navigation";
 
 export default function ProductsCategoryPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const { addItem } = useCartStore();
   const { toast } = useToastContext();
+  const searchParams = useSearchParams();
+  const searchTerm = (searchParams.get("q") ?? "").trim().toLowerCase();
 
-  const filteredProducts =
+  const categoryFilteredProducts =
     selectedCategory === "All"
       ? Object.values(PRODUCTS)
       : Object.values(PRODUCTS).filter((p) => p.category === selectedCategory);
+
+  const filteredProducts = searchTerm
+    ? categoryFilteredProducts.filter((product) => {
+        return (
+          product.title.toLowerCase().includes(searchTerm) ||
+          product.description.toLowerCase().includes(searchTerm) ||
+          product.category.toLowerCase().includes(searchTerm)
+        );
+      })
+    : categoryFilteredProducts;
 
   const handleQuickAddToCart = (product: any, e: React.MouseEvent) => {
     e.preventDefault();
@@ -57,7 +70,7 @@ export default function ProductsCategoryPage() {
       </section>
 
       {/* Filter Section */}
-      <section className="bg-secondary-dark-2 px-6 py-6 border-b border-secondary-gray sticky top-0 z-10">
+      <section className="bg-secondary-dark-2 px-6 py-6 border-b border-secondary-gray sticky top-28 z-10">
         <div className="max-w-7xl mx-auto flex justify-center items-center gap-4 flex-wrap">
           {PRODUCT_CATEGORIES.map((category) => (
             <button

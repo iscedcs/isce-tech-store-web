@@ -51,8 +51,10 @@ export default async function RootLayout({
       <html lang="en">
         <body className={`${montserrat.variable} antialiased`}>
           <ToastProvider>
-            <TopBanner />
-            <Navbar />
+            <div className="sticky top-0 z-50">
+              <TopBanner />
+              <Navbar />
+            </div>
             {children}
             <CtaSection />
             <Footer />
