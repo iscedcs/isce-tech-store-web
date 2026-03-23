@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import db from "@/lib/prisma";
 import { products } from "../lib/products";
-
-const prisma = new PrismaClient();
 
 async function main() {
   console.log("🌱 Starting product seeding...\n");
@@ -10,7 +8,7 @@ async function main() {
   console.log("📦 Seeding products...\n");
 
   for (const product of products) {
-    const created = await prisma.product.create({
+    const created = await db.product.create({
       data: {
         slug: product.slug,
         name: product.name,
@@ -37,5 +35,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await db.$disconnect();
   });
