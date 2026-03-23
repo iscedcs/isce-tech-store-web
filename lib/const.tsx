@@ -164,6 +164,29 @@ export const PRODUCTS: Record<string, any> = {
   },
 };
 
+export const PRODUCT_VARIATIONS: Record<string, string[]> = {
+  "alabaster-prime": [
+    "/products/variations/alabaster-prime-variation1.jpeg",
+    "/products/variations/alabaster-prime-variation2.jpeg",
+  ],
+  "obsidian-reserve": [
+    "/products/variations/obsidian-reserve-variation1.jpeg",
+    "/products/variations/obsidian-reserve-variation2.jpeg",
+  ],
+  "viridian-signature": [
+    "/products/variations/viridian-signature-variation1.jpeg",
+    "/products/variations/viridian-signature-variation2.jpeg",
+  ],
+  "rose-eclat": [
+    "/products/variations/rose-eclat-variation1.jpeg",
+    "/products/variations/rose-eclat-variation2.jpeg",
+  ],
+  "amethyst-reserve": [
+    "/products/variations/amethyst-reserve-variation1.jpeg",
+    "/products/variations/amethyst-reserve-variation2.jpeg",
+  ],
+};
+
 export const PRODUCT_CATEGORIES = [
   "All",
   "WEARABLE",

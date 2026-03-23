@@ -69,6 +69,7 @@ export default function ProductDetailWrapper({
             title={product.title}
             imageSrc={product.imageSrc}
             badge={product.badge}
+            productSlug={product.slug}
           />
 
           {/* Right: Product Info */}
